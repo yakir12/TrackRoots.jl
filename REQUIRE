@@ -1,1 +1,11 @@
 julia 0.6
+
+Images
+ImageFeatures
+Unitful
+Distances
+UnitfulAngles
+OffsetArrays
+StaticArrays
+StatsBase
+Distributions
