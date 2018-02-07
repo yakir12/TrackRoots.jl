@@ -15,7 +15,7 @@ post_fetch_method=unpack
 
     files = readdir(datadep"test")
     i = findfirst(x -> last(splitext(x)) == ".nd", files)
-    @test_nowarn md = TrackRoots.nd2metadata(joinpath(datadep"test", files[i]))
+    md = TrackRoots.nd2metadata(joinpath(datadep"test", files[i]))
     @test md.n == 2
 
 end
