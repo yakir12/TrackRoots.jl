@@ -1,17 +1,24 @@
 module TrackRoots
 
+#TODO: check if you really need all these packages...
+
 using Base.Dates, Images, ImageFeatures, Unitful, Distances, UnitfulAngles, OffsetArrays, StaticArrays, StatsBase, Distributions
 
 # export pixel_width, find_temporal_distance
 
 fwhm = 100u"μm"
-const root_tip_σ = fwhm/2sqrt(2log(2))
-const root_area = 0.3u"mm^2"
+# const root_tip_σ = fwhm/2sqrt(2log(2))
+# const root_area = 0.3u"mm^2"
 const h_kernel = Kernel.DoG((5, 180), (5*sqrt(2), 180), (31, 901))
 const α = pi/2 + linspace(-.05, .05, 10)
-const crop = (200:1024, 50:974)
-const area_cutoff = 7u"mm^2"
+# const crop = (200:1024, 50:974)
+# const area_cutoff = 7u"mm^2"
 
+"""
+    mylinspace(d1, d2, n)
+
+Same as `linspace` but for dates and times.
+"""
 function mylinspace(d1::DateTime, d2::DateTime, n::Int)
     Δ = d2 - d1
     T = typeof(Δ)
@@ -20,10 +27,19 @@ function mylinspace(d1::DateTime, d2::DateTime, n::Int)
     return d1:δ:d2
 end
 
+"""
+    FilePair(dark, light)
+A type that holds the file paths for both the dark and light images
+"""
 struct FilePair
     dark::String
     light::String
 end
+
+"""
+    Stage(timelapse)
+A type that holds all the `FilePair`s, including how many there are, `n`, and the range of times each image was taken in, `times`.
+"""
 struct Stage
     timelapse::Vector{FilePair}
     n::Int
@@ -34,6 +50,11 @@ struct Stage
         return new(timelapse, n, times)
     end
 end
+
+"""
+    MetaData(home, base, stages)
+A type that holds all the `Stage`s, including the path to the folder that holds the images, `home`, the base name for the images, `base`, the number of stages, `n`, and the image pixel width in mm, `Δ`.
+"""
 struct Metadata
     home::String
     base::String
@@ -42,7 +63,9 @@ struct Metadata
     Δ::Float64 # in mm
     Metadata(home::String, base::String, stages::Vector{Stage}) = new(home, base, stages, length(stages), pixel_width(stages))
 end
+
 _print_stage(dostages::Bool, si::Int) = dostages ? "_s$(si)" : ""
+
 function _print_file_name(home::String, base::String, dostages::Bool, si::Int, ti::Int)
     head = "$(base)_w"
     s = _print_stage(dostages, si)
@@ -51,6 +74,11 @@ function _print_file_name(home::String, base::String, dostages::Bool, si::Int, t
     light = joinpath(home, "$(head)2BF 10-$tail")
     return FilePair(dark, light)
 end
+
+"""
+    nd2metadata(file)
+Return a `Metadata` for an `.nd` `file`. 
+"""
 nd2metadata(file::String) = open(file, "r") do o
     home, f = splitdir(file)
     base, _ = splitext(f)
@@ -111,6 +139,11 @@ end
     d = unix2datetime(mean(mtime(s.timelapse[end].light) - mtime(s.timelapse[1].light) for s in md.stages)) - unix2datetime(0)
     return ustrip(uconvert(u"d", Dates.value(d)*u"ms")) # in days
 end=#
+
+"""
+    find_vertical_distances(file)
+Find all the distances between vertical edges in an image. Helps detect the grid lines in the background of the light images.
+"""
 function find_vertical_distances(file::String)
     img = load(file)
     I = imfilter(img, h_kernel, "symmetric")
@@ -120,6 +153,11 @@ function find_vertical_distances(file::String)
     x = first.(lines)'
     return vec(pairwise(Cityblock(), x))
 end
+
+"""
+    pixel_width(stages)
+Return the first good-enough pixel width from all the images in this stack.
+"""
 function pixel_width(stages::Vector{Stage})
     for st in stages
         file = st.timelapse[1].light 
