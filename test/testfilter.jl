@@ -30,6 +30,6 @@ M = Model1
 ntips = length(tips)
 X0 = [SVector(tips[i][1]..., M.x0[3:4]...) for i in 1:ntips]
 P0 = [M.P0 for i in 1:ntips]
-roots = trackandfilter(tostatic(Model1), imgs, X0, P0, 10)
+roots, ll = trackandfilter(tostatic(Model1), imgs, X0, P0, 10)
 
 @test norm(roots[end][1:2] - [930.207, 692.298]) < 0.1
