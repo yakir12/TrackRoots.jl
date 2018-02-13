@@ -24,6 +24,7 @@ model(ρ, v) = let
 end
 
 Model1 = let
+    # position x, y and velocity x, y
     p0 = [NaN, NaN, 0.0, 2.0]
     P0 = 10*eye(4)
 
@@ -34,6 +35,8 @@ Model1 = let
     ]
 
     b = [0.0, 0.0, 0.0, 0.0]
+    # why 5 5
+    # why 1*
     Q = 1*diagm([1.0, 1.0, 5.0, 5.0])
 
     y = [NaN, NaN]

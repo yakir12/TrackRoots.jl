@@ -8,10 +8,13 @@ using Base.Test
 sz = (1024, 1024)
 nframe = 25
 @time imgs0 = zeros(sz...,  nframe)
+
 @time for k in 1:nframe
     imgs0[:,:,k] = convert(Matrix{Float64}, Images.load(joinpath(Pkg.dir("TrackRoots"), "test", "testimage", "$k.TIF")))
 end
+
 imgs = normalize!(imgs0[1:768, :, :])
+
 logimgs = normalize!(log.(0.003 + imgs))
 
 

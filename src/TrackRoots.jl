@@ -1,12 +1,10 @@
 module TrackRoots
 
-#TODO: check if you really need all these packages...
+using ImageFiltering, ImageFeatures, Unitful, Distances, StaticArrays, FileIO
 
-using Base.Dates, Images, ImageFeatures, Unitful, Distances, UnitfulAngles, OffsetArrays, StaticArrays, StatsBase, Distributions
+export nd2metadata, File, FilePair, Stage, Metadata
 
-# export pixel_width, find_temporal_distance
-
-fwhm = 100u"μm"
+# fwhm = 100u"μm"
 # const root_tip_σ = fwhm/2sqrt(2log(2))
 # const root_area = 0.3u"mm^2"
 const h_kernel = Kernel.DoG((5, 180), (5*sqrt(2), 180), (31, 901))
@@ -14,40 +12,52 @@ const α = pi/2 + linspace(-.05, .05, 10)
 # const crop = (200:1024, 50:974)
 # const area_cutoff = 7u"mm^2"
 
-"""
-    mylinspace(d1, d2, n)
+exiftool_base = joinpath(Pkg.dir("Associations"), "deps", "src", "exiftool", "exiftool")
+const exiftool = exiftool_base*(is_windows() ? ".exe" : "")
 
-Same as `linspace` but for dates and times.
 """
-function mylinspace(d1::DateTime, d2::DateTime, n::Int)
-    Δ = d2 - d1
-    T = typeof(Δ)
-    δ = T(round(Int, Dates.value(Δ)/(n - 1)))
-    d2 = d1 + δ*(n - 1)
-    return d1:δ:d2
+    parse2ms(txt)
+Convert `txt` to milliseconds.
+"""
+function parse2ms(x::String)
+    m = match(r"^(\d\d\d\d)(\d\d)(\d\d) (\d\d):(\d\d):(\d\d).?(\d?\d?\d?)", x)
+    @assert m ≠ nothing "Failed to extract date and time from string $x"
+    Dates.value(DateTime(parse.(Int, m.captures)...))
+end
+
+function getDateTimes(files::Vector{String})
+end
+
+"""
+    File(path)
+A type that holds the file path and time.
+"""
+struct File
+    path::String
+    time::Int
 end
 
 """
     FilePair(dark, light)
-A type that holds the file paths for both the dark and light images
+A type that holds the file data for both the dark and light images
 """
 struct FilePair
-    dark::String
-    light::String
+    dark::File
+    light::File
 end
 
 """
     Stage(timelapse)
-A type that holds all the `FilePair`s, including how many there are, `n`, and the range of times each image was taken in, `times`.
+A type that holds all the `FilePair`s, including how many there are, `n`.
 """
 struct Stage
     timelapse::Vector{FilePair}
     n::Int
-    times::StepRange{DateTime,Millisecond}
-    function Stage(timelapse::Vector{FilePair}) 
+    Δt::Unitful.Time
+    Δx::Unitful.Length
+    function Stage(timelapse::Vector{FilePair}, Δt::Unitful.Time, Δx::Unitful.Length) 
         n = length(timelapse)
-        times = mylinspace(unix2datetime(mtime(timelapse[1].dark)), unix2datetime(mtime(timelapse[end].dark)), n)
-        return new(timelapse, n, times)
+        new(timelapse, n, Δt, Δx)
     end
 end
 
@@ -60,8 +70,7 @@ struct Metadata
     base::String
     stages::Vector{Stage}
     n::Int
-    Δ::Float64 # in mm
-    Metadata(home::String, base::String, stages::Vector{Stage}) = new(home, base, stages, length(stages), pixel_width(stages))
+    Metadata(home::String, base::String, stages::Vector{Stage}) = new(home, base, stages, length(stages))
 end
 
 _print_stage(dostages::Bool, si::Int) = dostages ? "_s$(si)" : ""
@@ -72,7 +81,7 @@ function _print_file_name(home::String, base::String, dostages::Bool, si::Int, t
     tail = "$(s)_t$ti.TIF"
     dark = joinpath(home, "$(head)1[None]$tail")
     light = joinpath(home, "$(head)2BF 10-$tail")
-    return FilePair(dark, light)
+    return [dark, light]
 end
 
 """
@@ -124,21 +133,26 @@ nd2metadata(file::String) = open(file, "r") do o
     end
     l = readline(o)
     waveinfilename = r"true"i(l)
-    stages = Stage[]
-    for si in 1:nstages
-        timelapse = FilePair[]
-        for fi in 1:ntimelapses
-            push!(timelapse, _print_file_name(home, base, dostages, si, fi))
+
+    files = Array{String, 3}(2, ntimelapses, nstages)
+    for si in 1:nstages, fi in 1:ntimelapses
+        files[:, fi, si] = _print_file_name(home, base, dostages, si, fi)
+    end
+    ts = reshape([parse2ms(x) for x in eachline(`$exiftool -T -ModifyDate -n $files`)], 2, ntimelapses, nstages)
+
+    timelapses = map(1:nstages) do si
+        map(1:ntimelapses) do fi
+            FilePair(File(files[1, fi, si], ts[1, fi, si]), File(files[2, fi, si], ts[2, fi, si]))
         end
-        push!(stages, Stage(timelapse))
+    end
+    Δx = pixel_width(timelapses)
+    stages = Stage[]
+    for tl in timelapses
+        Δt = mean(diff([i.dark.time for i in tl]))*1u"ms"
+        push!(stages, Stage(tl, Δt, Δx))
     end
     return Metadata(home, base, stages)
 end
-
-#=function find_temporal_distance(md::Metadata)
-    d = unix2datetime(mean(mtime(s.timelapse[end].light) - mtime(s.timelapse[1].light) for s in md.stages)) - unix2datetime(0)
-    return ustrip(uconvert(u"d", Dates.value(d)*u"ms")) # in days
-end=#
 
 """
     find_vertical_distances(file)
@@ -158,15 +172,20 @@ end
     pixel_width(stages)
 Return the first good-enough pixel width from all the images in this stack.
 """
-function pixel_width(stages::Vector{Stage})
-    for st in stages
-        file = st.timelapse[1].light 
+function pixel_width(timelapses::Vector{Vector{FilePair}})
+    for tl in timelapses
+        file = tl[1].light.path 
         x = find_vertical_distances(file)
         filter!(i -> 200 < i < 650, x)
-        isempty(x) || return 80/6/mean(x) # in mm
+        isempty(x) || return 80u"mm"/6/mean(x) # in mm
     end
-    return NaN
+    return 0.03819517804872148u"mm"
 end
+
+#=function find_temporal_distance(md::Metadata)
+    d = unix2datetime(mean(mtime(s.timelapse[end].light) - mtime(s.timelapse[1].light) for s in md.stages)) - unix2datetime(0)
+    return ustrip(uconvert(u"d", Dates.value(d)*u"ms")) # in days
+end=#
 
 #=function segment(st::TrackRoots.Stage, pixspace::Unitful.Length)
     kernel = Kernel.DoG(uconvert(Unitful.NoUnits, root_tip_σ/pixspace))
