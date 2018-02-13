@@ -12,7 +12,7 @@ const α = pi/2 + linspace(-.05, .05, 10)
 # const crop = (200:1024, 50:974)
 # const area_cutoff = 7u"mm^2"
 
-exiftool_base = joinpath(Pkg.dir("Associations"), "deps", "src", "exiftool", "exiftool")
+exiftool_base = joinpath(Pkg.dir("TrackRoots"), "deps", "src", "exiftool", "exiftool")
 const exiftool = exiftool_base*(is_windows() ? ".exe" : "")
 
 """
