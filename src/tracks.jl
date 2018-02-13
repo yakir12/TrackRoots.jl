@@ -49,7 +49,7 @@ function model(vrow::Float64)
          0 0 ρ[1] 0
          0 0 0 ρ[2]])
     b = SVector(0, 0, (1-ρ[1])*vrow, (1-ρ[2])*0)
-    Q = 1*SMatrix{4,4, Float64}(diagm([1, 1, 5, 5]))
+    Q = 1*SMatrix{4,4, Float64}(diagm([1, 1, ρ...]))
     y = SVector(NaN, NaN)
     C = @SMatrix eye(2, 4)
     R = 2*@SMatrix eye(2)
