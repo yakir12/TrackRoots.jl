@@ -77,10 +77,11 @@ function predict!(r::Root, img::Image, t1::Int, t2::Int)
     x, Ppred, A = Kalman.predict!(t1, r.x, r.P, t2, r.M)
     ind = CartesianIndex(round.(Int, x[1:2])...)
     y, err = image_feedback(img, ind)
+    r.l += err
     # r.l += img[round.(Int, y)...]
     _, obs, C, R = Kalman.observe!(t1, x, r.P, t2, y, r.M)
     r.x, r.P, yres, S, K = Kalman.correct!(x, Ppred, obs, C, R, r.M)
-    r.l += Kalman.llikelihood(yres, S, r.M)
+    # r.l += Kalman.llikelihood(yres, S, r.M)
 end
 
 function weedout!(r::Root, μ)

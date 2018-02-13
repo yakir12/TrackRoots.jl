@@ -37,10 +37,16 @@ for i in 1:8
     tip = tips[i]
     tip = [tip]
 
-    #=using ImageFiltering, Images
+    using ImageFiltering, Images
     img = load(st.timelapse[1].dark.path)
     img1 = imfilter(img, Kernel.gaussian(4))
     p = findlocalmaxima(img1)
+    sort!(p, by=i -> img[i],rev=true)
+    tip = [(Float64.([ti.I...])...) for ti in p]
+    filter!(x -> !outside(Vector(Point(x))), tip)
+    tip = tip[1:1]
+    push!(tip, tips[i])
+
     # b = blob_LoG(img[1:sz,1:sz], linspace(5,40,5))
     # p = getfield.(b, :location)
     μ = quantile(vec(img), 0.95)
@@ -55,7 +61,7 @@ for i in 1:8
     push!(tip, (676., 221.))
 
     tip = []
-    push!(tip, (592., 226.))=#
+    push!(tip, (592., 226.))
 
     roots = mytrack(st, tip)
 
