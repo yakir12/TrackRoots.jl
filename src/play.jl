@@ -21,7 +21,7 @@ rr = Dict()
 
 for i in 1:8
 
-    i = 2
+    # i = 2
     files = readdir(joinpath(datadep"all", string(i)))
     j = findfirst(x -> last(splitext(x)) == ".nd", files)
     md = TrackRoots.nd2metadata(joinpath(datadep"all", string(i), files[j]))
@@ -37,7 +37,7 @@ for i in 1:8
     tip = tips[i]
     tip = [tip]
 
-    using ImageFiltering, Images
+    #=using ImageFiltering, Images
     img = load(st.timelapse[1].dark.path)
     img1 = imfilter(img, Kernel.gaussian(4))
     p = findlocalmaxima(img1)
@@ -55,12 +55,12 @@ for i in 1:8
     push!(tip, (676., 221.))
 
     tip = []
-    push!(tip, (592., 226.))
+    push!(tip, (592., 226.))=#
 
     roots = mytrack(st, tip)
 
 
-n = 30
+#=n = 30
     for r in roots
         dyx = diff(r.points[1:n])
         l = sqrt.(sum.(abs2, dyx))
@@ -68,14 +68,14 @@ n = 30
         av = sqrt(mean(first.(a))^2 + mean(last.(a))^2)
         dv = var(l)
         @show [mean(l), dv, av]
-    end
+    end=#
 
     #=s = md.Δx*sqrt.(sum.(abs2, diff(roots[1].points)))./[1u"ms"*(st.timelapse[i+1].dark.time - st.timelapse[i].dark.time) for i in 1:length(roots[1].points) - 1]
     for si in s
         s2 = ustrip(uconvert(u"mm"/u"d", si))
         push!(df, (string(i), s2))
     end=#
-    rr[i] = [(md.Δx*roots[1].points[i], uconvert(u"d", 1u"ms"*st.timelapse[i].dark.time)) for i in 1:length(roots[1].points)]
+    rr[i] = [(st.Δx*roots[1].points[i], uconvert(u"d", 1u"ms"*st.timelapse[i].dark.time)) for i in 1:length(roots[1].points)]
 
     #=s = md.Δx*diff(first.(roots[1].points))./[1u"ms"*(st.timelapse[i+1].dark.time - st.timelapse[i].dark.time) for i in 1:length(roots[1].points) - 1]
     for si in s
@@ -119,12 +119,13 @@ end
 # s2 = ustrip.(uconvert.(u"mm"/u"d", s))
 # histogram(s2, xlim=(-1,12))
 
-yx = Dict(k => ustrip.(first.(v)) for (k,v) in rr)
+yx = Dict(k => ustrip.(first.(rr[k])) for k in 2:8)
 t = Dict(k => ustrip.(last.(v)) for (k,v) in rr)
 
 y = [first(i) for v in values(yx) for i in v]
 
-dy = cat(1, [diff(first.(v))./diff(t[k]) for (k,v) in yx]...)
+dy = mean([var(diff(diff(first.(v))./diff(t[k]))) for (k,v) in yx])
+dx = mean([var(diff(diff(last.(v))./diff(t[k]))) for (k,v) in yx])
 
 c = Float64[]
 for (k,v) in yx

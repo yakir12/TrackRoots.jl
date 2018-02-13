@@ -8,6 +8,7 @@ const Index = CartesianIndex{2}
 
 const speed = 4.127054775014554u"mm/d" # mean downwards speed along the rows of the image
 const ρ = (0.8, 0.5) # how much do you trust each speed. This has been calculated from a bunch of datasets
+const Qρ = (0.38629498696108994*(1 - ρ[1]^2), 0.2584574519006643*(1 - ρ[2]^2))
 
 w = 3
 const XY = hcat(vec(Base.vect.(Float64.(-w:w), Float64.(-w:w)'))...)
@@ -49,7 +50,7 @@ function model(vrow::Float64)
          0 0 ρ[1] 0
          0 0 0 ρ[2]])
     b = SVector(0, 0, (1-ρ[1])*vrow, (1-ρ[2])*0)
-    Q = 1*SMatrix{4,4, Float64}(diagm([1, 1, ρ...]))
+    Q = 1*SMatrix{4,4, Float64}(diagm([1, 1, Qρ...]))
     y = SVector(NaN, NaN)
     C = @SMatrix eye(2, 4)
     R = 2*@SMatrix eye(2)
