@@ -63,6 +63,8 @@ mutable struct Root
     P::SMatrix{4, 4, Float64}
     points::Vector{Point}
     grow::Bool
+    err::Float64
+    I::Float64
     l::Float64
     keep::Bool
 
@@ -77,11 +79,11 @@ function predict!(r::Root, img::Image, t1::Int, t2::Int)
     x, Ppred, A = Kalman.predict!(t1, r.x, r.P, t2, r.M)
     ind = CartesianIndex(round.(Int, x[1:2])...)
     y, err = image_feedback(img, ind)
-    r.l += err
-    # r.l += img[round.(Int, y)...]
+    r.err += err
+    r.I += img[round.(Int, y)...]
     _, obs, C, R = Kalman.observe!(t1, x, r.P, t2, y, r.M)
     r.x, r.P, yres, S, K = Kalman.correct!(x, Ppred, obs, C, R, r.M)
-    # r.l += Kalman.llikelihood(yres, S, r.M)
+    r.l += Kalman.llikelihood(yres, S, r.M)
 end
 
 function weedout!(r::Root, μ)
@@ -110,7 +112,7 @@ function mytrack(st::Stage, ps)
                 # check && weedout!(r, μ)
             end
         end
-        filter!(r -> r.keep, roots)
+        # filter!(r -> r.keep, roots)
     end
     return roots
 end
