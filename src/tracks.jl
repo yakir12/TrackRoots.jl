@@ -63,16 +63,44 @@ mutable struct Root
     P::SMatrix{4, 4, Float64}
     points::Vector{Point}
     grow::Bool
-    err::Float64
-    I::Float64
-    l::Float64
-    keep::Bool
+    # err::Float64
+    # I::Float64
+    # l::Float64
+    # keep::Bool
 
-    function Root(vrow::Float64, x::Tuple{Float64, Float64})
+    function Root(vrow::Float64, x::CartesianIndex{2})
         M = model(vrow)
-        new(M, SVector(x..., M.x0[3], M.x0[4]), M.P0, [Point(x...)], true, 0.0, true)
+        new(M, SVector{4, Float64}(x.I..., M.x0[3], M.x0[4]), M.P0, [Point(x.I...)], true, 0.0, true)
     end
 end
+
+getdisk(Δx::Unitful.Length, w = 1u"mm") = [[x,y] for x in -w:Δx:w for y in -w:Δx:w if sqrt(x^2 + y^2) ≤ w]
+
+function get_dis_int(img::Image, p1, p2, Δx::Unitful.Length, disk)
+    r1 = Δx*p1
+    r2 = Δx*p2
+    i = r2 - r1
+    l = norm(i)
+    i /= l
+    Δ = min(Δx/2, l/2)
+    distances = linspace(0u"mm", l, ceil(Int, max(l/Δx, 2)))[2:end]
+    rs = [r1 + d*i for d in distances]
+    intensities = map(rs) do r
+        dr = unique(CartesianIndex(round.(Int, (d + r)/Δx)...) for d in disk)
+        sum(Float64.(img[dr]))
+    end
+    return (distances, intensities)
+end
+
+
+    img = load(md.stages[1].timelapse[1].dark.path)
+    p1 = [100,200]
+    p2 = [109,205]
+    Δx = .1u"mm"
+    disk = getdisk(Δx)
+fun(img, p1, p2, Δx, disk)
+
+
 
 
 function predict!(r::Root, img::Image, t1::Int, t2::Int)
@@ -99,7 +127,8 @@ function mytrack(st::Stage, ps)
     vrow = uconvert(NoUnits, st.Δt*speed/st.Δx)
     roots = Root.(vrow, ps)
     μ = 0.0
-    for (tl1, tl2, check) in zip(st.timelapse[2:end], [st.timelapse[3:end]; st.timelapse[end]], mod(i,30) == 0 for i in 1:st.n-1)
+    n = 10
+    for (tl1, tl2) in zip(st.timelapse[2:n], [st.timelapse[3:n]; st.timelapse[n]])#, mod(i,30) == 0 for i in 1:st.n-1)
         img = load(tl1.dark.path)
         μ += mean(img)
         for r in roots
