@@ -16,8 +16,37 @@ md = nd2metadata(nd_file)
 roots = mytrack(md.stages[stage_number], CartesianIndex.(root_tips))
 
 
+m = reshape(1:30, 5, 6)
+# using ImageAxes
+using Unitful
+import Unitful:mm
+img = AxisArray(m, 
+                Axis{:y}(1mm:1mm:5mm),
+                Axis{:x}(1mm:1mm:6mm))
 
-using ImageAxes
-img = AxisArray(img,
-                Axis{:x}(1mm:1mm:1024mm),
-                Axis{:y}(1mm:1mm:1024mm))
+img[atindex(-1mm..1mm, 4), atindex(-1mm..1mm, 2)]
+
+using AxisArrays
+B = AxisArray(randn(100,100,100), :x, :y, :z)
+Itotal = sumz = 0.0
+for iter in CartesianRange(indices(B))  # traverses in storage order for cache efficiency
+    I = B[iter]  # intensity in a single voxel
+    Itotal += I
+    sumz += I * iter[axisdim(B, Axis{:z})]  # axisdim "looks up" the z dimension
+end
+meanz = sumz/Itotal
+
+
+using Unitful
+import Unitful:mm
+B = AxisArray(randn(100,100,100), Axis{:x}(1:100), Axis{:y}(1:100), Axis{:z}(linspace(1mm,3mm,100)))
+
+Itotal = sumz = 0.0
+for iter in CartesianRange(indices(B))  # traverses in storage order for cache efficiency
+    I = B[iter]  # intensity in a single voxel
+    Itotal += I
+    sumz += I * iter[axisdim(B, Axis{:z})]  # axisdim "looks up" the z dimension
+end
+meanz = sumz/Itotal
+
+    axisvalues(axes(B, Axis{:z}))[1][45]
