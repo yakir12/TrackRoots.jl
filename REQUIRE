@@ -9,5 +9,14 @@ Distances
 UnitfulAngles
 OffsetArrays
 StaticArrays
-StatsBase
 Distributions
+ImageFiltering
+FileIO
+Gtk
+ImageView
+Colors
+GtkReactive
+Kalman
+FixedPointNumbers
+Plots
+HDF5

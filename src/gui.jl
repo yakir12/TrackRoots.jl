@@ -1,42 +1,117 @@
-using Makie, GeometryTypes, Colors, Images
-using TrackRoots
-include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))
-using DataDeps
-RegisterDataDep("all",
-                "These are all 8 folders with their `nd` files and multiple dark and light timelapse 16 bit TIF images (7.8 GB total).",
-                "https://s3.eu-central-1.amazonaws.com/yakirgagnon/roots/eight_folders.zip",
-                "c316452c19e3c639737821581d18e45654980e04e0244f3d43e30d47d3e81f11",
-                post_fetch_method=unpack)
-i = 8
-files = readdir(joinpath(datadep"all", string(i)))
-j = findfirst(x -> last(splitext(x)) == ".nd", files)
-md = TrackRoots.nd2metadata(joinpath(datadep"all", string(i), files[j]))
-img = load(md.stages[1].timelapse[1].dark.path)
-img = imadjustintensity(img, quantile(vec(Float64.(img)), [.1, .995]))
-scene = Scene(resolution=(sz, sz))
-heatmap(img)
-center!(scene, 0)
-cam = scene[:screen].cameras[:orthographic_pixel]
-Makie.add_mousebuttons(scene)
-clicks = to_node(Point2f0[])
-pos = lift_node(scene, :mousebuttons) do buttons
-    if length(buttons) == 1 
-        if first(buttons) == Mouse.left
-            pos = to_world(Point2f0(to_value(scene, :mouseposition)), cam)
-            # awkward! one push! for adding to clicks, another to update the node!
-            push!(clicks, push!(to_value(clicks), pos))
-        #=elseif first(buttons) == Mouse.right 
-            pos = to_world(Point2f0(to_value(scene, :mouseposition)), cam)
-            kill = map(enumerate(clicks.signal.value)) do ixy
-                if norm(last(ixy) - pos) < 100
-                    return first(ixy)
-                end
-            end
-            !isempty(kill) && deleteat!(clicks.signal.value, kill)=#
+using ImageView, FileIO, Colors, GtkReactive, StaticArrays, Images
+const PixelPoint = SVector{2, Float64}
+__print_stage(dostages::Bool, si::Int) = dostages ? "_s$(si)" : ""
+function __print_file_name(home::String, base::String, dostages::Bool, si::Int, ti::Int)
+    head = "$(base)_w"
+    s = __print_stage(dostages, si)
+    tail = "$(s)_t$ti.TIF"
+    return joinpath(home, "$(head)1[None]$tail")
+end
+startstopfiles(file::String) = open(file, "r") do o
+    # o = open(ndfile, "r")
+    home, f = splitdir(file)
+    base, _ = splitext(f)
+    l = readline(o)
+    @assert r"NDInfoFile"(l) "not an `.nd` file"
+    l = readline(o)
+    @assert r"Description"(l) "wrong `.nd` file format"
+    l = readline(o)
+    m = match(r"^\"StartTime1\", (\d\d\d\d)(\d\d)(\d\d) (\d\d):(\d\d):(\d\d)$", l)
+    starttime = DateTime(parse.(Int, m.captures)...)
+    l = readline(o)
+    @assert r"true"i(l) "no time-lapse...?" 
+    l = readline(o)
+    m = match(r"^\"NTimePoints\", (\d*)$", l)
+    ntimelapses = parse(Int, m.captures[1])
+    l = readline(o)
+    dostages = r"true"i(l)
+    if dostages
+        l = readline(o)
+        m = match(r"^\"NStagePositions\", (\d*)$", l)
+        nstages = parse(Int, m.captures[1])
+        for i in 1:nstages
+            readline(o)
+        end
+    else
+        nstages = 1
+    end
+    l = readline(o)
+    @assert r"true"i(l) "I don't know yet how to deal with no waves"
+    l = readline(o)
+    m = match(r"^\"NWavelengths\", (\d*)$", l)
+    nwaves = parse(Int, m.captures[1])
+    wavenames = Vector{String}(nwaves)
+    for i in 1:nwaves
+        l = readline(o)
+        m = match(r"^\"WaveName\d\", \"(.*)\"$", l)
+        wavenames[i] = replace(m.captures[1], '%', '-')
+        l = readline(o)
+        if r"true"i(l)
+            l = readline(o)
+            @assert r"false"i(l) "I don't know yet how to deal with `ZSeries`" 
         end
     end
-    return 
+    l = readline(o)
+    waveinfilename = r"true"i(l)
+    return (home, base, [[__print_file_name(home, base, dostages, si, fi) for fi in [1, ntimelapses]] for si in 1:nstages])
 end
-scatter(clicks, markersize = 10)
-wait(scene)
-println(clicks.signal.value)
+function adjustimg(file::String)
+    img = Float64.(load(file))
+    mM = quantile(vec(img), [.1, .995])
+    img .= imadjustintensity(img, mM)
+end
+function getroots(stage::Vector{String}, home::String, base::String)
+    img = adjustimg.(stage)
+    # imgc = colorview(RGB, img[2], img...)
+    imgc = [RGB(i2, i1, i2) for (i1, i2) in zip(img...)]
+    const g = imshow(imgc, name="<Shift>-click on the root tips")
+    const c = g["gui"]["canvas"]
+    const add = Signal(XY{UserUnit}(1,1)) 
+    const remove = Signal(XY{UserUnit}(1,1)) 
+    const roots = foldp(push!, XY{UserUnit}[], add)
+    const points = foldp([], add) do a, xy
+        push!(a, ImageView.annotate!(g, AnnotationPoint(xy.x.val, xy.y.val, shape='.', size=10, color=RGB(1,0,0))))
+    end
+    sigstart = map(c.mouse.buttonpress) do btn
+        if btn.button == 1
+            if btn.modifiers == 1 # shift
+                push!(add, btn.position)
+            elseif btn.modifiers == 5 #shift+ctrl
+                push!(remove, btn.position)
+            end
+        end
+    end
+    GtkReactive.gc_preserve(g["gui"]["window"], sigstart) 
+    removeidx = map(remove) do xy
+        idx = Int[]
+        for (i, root) in enumerate(value(roots))
+            dxy = xy - root
+            if sqrt(dxy.x.val^2 + dxy.y.val^2) < 50
+                push!(idx, i)
+            end
+        end
+        return idx
+    end
+    foreach(removeidx) do i
+        deleteat!(value(roots), i)
+        for j in i
+            delete!(g, value(points)[j])
+        end
+        deleteat!(value(points), i)
+    end
+    close = Condition()
+    # roots2 = Signal(PixelPoint[])
+    signal_connect(g["gui"]["window"], :destroy) do widget
+        # push!(roots2, [PixelPoint(xy.y.val, xy.x.val) for xy in value(roots)])
+        notify(close)
+    end
+    wait(close)
+    # return roots2
+    return [PixelPoint(xy.y.val, xy.x.val) for xy in value(roots)]
+    #=open(joinpath(home, "$(base)_stage$(stage_number)_tips.csv"), "w") do o
+        for xy in value(roots)
+            println(o, xy.x.val, ",", xy.y.val)
+        end
+    end=#
+end
+
