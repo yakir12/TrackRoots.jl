@@ -16,7 +16,6 @@ Gtk
 ImageView
 Colors
 GtkReactive
-Kalman
 FixedPointNumbers
 Plots
 HDF5

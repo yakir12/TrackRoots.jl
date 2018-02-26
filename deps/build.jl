@@ -1,5 +1,7 @@
 using BinDeps
 
+Pkg.clone("https://github.com/mschauer/Kalman.jl")
+
 basedir = dirname(@__FILE__)
 
 program = "exiftool"
