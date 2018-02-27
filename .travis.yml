@@ -36,6 +36,7 @@ addons:
             - xvfb
             - xauth
             - libgtk-3-0
+            - ffmpeg
 script:
     - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
     - if [[ `uname` = "Linux" ]]; then TESTCMD="xvfb-run julia"; else TESTCMD="julia"; fi
