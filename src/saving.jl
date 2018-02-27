@@ -47,22 +47,22 @@ function saveit(home::String, base::String, st::Stage, rs::Vector{Track})
     for r in rs
         x, y, n, I, lengths, times  = get_parameters(r, st.Δx)
         save2hdf5(home, base, x, y, I, lengths, times, st.index, r.index)
-        # save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, st.index, r.index)
+        save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, st.index, r.index)
     end
 end
 
 function save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, stage_number, root_number)
     Imax = maximum(I)
     anim = Animation()
-    for i in 1:n
+    for i in 1:2#n
         h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
-        plot!(x[1:i], y[1:i])
-        h2 = plot([I[:,i]; 0], [lengths; lengths[end]], fill = 0, fillcolor = :green, linecolor = :green, xlim = (0, Imax), xticks = nothing,  yflip = true, xlabel = "Intensity")
-        h3 = plot(times, I[i, :], fill = 0, fillcolor = :blue, linecolor = :blue, ylim = (0, Imax), yticks = nothing, ylabel = "Intensity")
-        h4 = heatmap(times, lengths, I, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true)
-        plot!(times[[1, end]], [lengths[i], lengths[i]], color = :blue)
-        plot!([times[i], times[i]], lengths[[1, end]], color = :green)
-        plot(h3, h1, h4, h2, size = (2sz2, 2sz2))
+        # plot!(x[1:i], y[1:i])
+        # h2 = plot([I[:,i]; 0], [lengths; lengths[end]], fill = 0, fillcolor = :green, linecolor = :green, xlim = (0, Imax), xticks = nothing,  yflip = true, xlabel = "Intensity")
+        # h3 = plot(times, I[i, :], fill = 0, fillcolor = :blue, linecolor = :blue, ylim = (0, Imax), yticks = nothing, ylabel = "Intensity")
+        # h4 = heatmap(times, lengths, I, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true)
+        # plot!(times[[1, end]], [lengths[i], lengths[i]], color = :blue)
+        # plot!([times[i], times[i]], lengths[[1, end]], color = :green)
+        # plot(h3, h1, h4, h2, size = (2sz2, 2sz2))
         Plots.frame(anim)
     end
     gif(anim, joinpath(home, "$(base)_stage_$(stage_number)_root_$(root_number)_summary.gif"), fps = 30)
