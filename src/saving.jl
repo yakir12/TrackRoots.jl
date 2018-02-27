@@ -52,10 +52,11 @@ function saveit(home::String, base::String, st::Stage, rs::Vector{Track})
 end
 
 function save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, stage_number, root_number)
-    Imax = maximum(I)
-    anim = Animation()
+    # Imax = maximum(I)
+    # anim = Animation()
     for i in 1:2#n
-        h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
+        plot(rand(2))
+        # h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
         # plot!(x[1:i], y[1:i])
         # h2 = plot([I[:,i]; 0], [lengths; lengths[end]], fill = 0, fillcolor = :green, linecolor = :green, xlim = (0, Imax), xticks = nothing,  yflip = true, xlabel = "Intensity")
         # h3 = plot(times, I[i, :], fill = 0, fillcolor = :blue, linecolor = :blue, ylim = (0, Imax), yticks = nothing, ylabel = "Intensity")
