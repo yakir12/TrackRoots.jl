@@ -29,6 +29,19 @@ matrix:
 ## uncomment the following lines to override the default test script
 #script:
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("TrackRoots"); Pkg.test("TrackRoots"; coverage=true)'
+#
+addons:
+    apt:
+        packages:
+            - xvfb
+            - xauth
+            - libgtk-3-0
+script:
+    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+    - if [[ `uname` = "Linux" ]]; then TESTCMD="xvfb-run julia"; else TESTCMD="julia"; fi
+    - $TESTCMD -e 'Pkg.clone(pwd());
+        Pkg.build("TrackRoots");
+        Pkg.test("TrackRoots"; coverage=true)'
 after_success:
   # push coverage results to Coveralls
   - julia -e 'cd(Pkg.dir("TrackRoots")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
