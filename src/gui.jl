@@ -74,8 +74,8 @@ function getroots(stage::Vector{String}, home::String, base::String)
     end
     sigstart = map(c.mouse.buttonpress) do btn
         println(btn.button, ",", btn.modifiers)
-        if btn.button == 1
-            if btn.modifiers == 1 # shift
+        if btn.button == GtkReactive.BUTTON_PRESS
+            if btn.modifiers == GtkReactive.SHIFT
                 push!(add, btn.position)
             elseif btn.modifiers == 5 #shift+ctrl
                 push!(remove, btn.position)
