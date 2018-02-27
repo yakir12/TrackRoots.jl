@@ -53,7 +53,7 @@ end
 
 function save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, stage_number, root_number)
     # Imax = maximum(I)
-    # anim = Animation()
+    anim = Animation()
     for i in 1:2#n
         plot(rand(2))
         # h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
