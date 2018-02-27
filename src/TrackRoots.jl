@@ -1,6 +1,13 @@
 module TrackRoots
 
 using Gtk
+
+w = 5
+border = 2w
+const sz = 1024
+outside(i::Float64) = i ≤ 1 + border || i ≥ sz - border
+outside(p::T) where T <: AbstractVector = any(outside(i) for i in p)
+
 include(joinpath(Pkg.dir("TrackRoots"), "src", "gui.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "ndfiles.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))

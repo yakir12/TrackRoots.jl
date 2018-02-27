@@ -1,7 +1,10 @@
 using BinDeps
 
-Pkg.clone("https://github.com/mschauer/GaussianDistributions.jl")
-Pkg.clone("https://github.com/mschauer/Kalman.jl")
+for pkg in ["GaussianDistributions", "Kalman"]
+    if Pkg.cd(!isdir, pkg) 
+        Pkg.clone("https://github.com/mschauer/$pkg.jl")
+    end
+end
 
 basedir = dirname(@__FILE__)
 

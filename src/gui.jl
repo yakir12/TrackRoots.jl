@@ -1,5 +1,6 @@
 using ImageView, FileIO, Colors, GtkReactive, StaticArrays, Images
 const PixelPoint = SVector{2, Float64}
+pixelpoint(p::XY{UserUnit}) = PixelPoint(p.y.val, p.x.val)
 __print_stage(dostages::Bool, si::Int) = dostages ? "_s$(si)" : ""
 function __print_file_name(home::String, base::String, dostages::Bool, si::Int, ti::Int)
     head = "$(base)_w"
@@ -64,7 +65,7 @@ function getroots(stage::Vector{String}, home::String, base::String)
     img = adjustimg.(stage)
     # imgc = colorview(RGB, img[2], img...)
     imgc = [RGB(i2, i1, i2) for (i1, i2) in zip(img...)]
-    const g = imshow(imgc, name="<Shift>-click on the root tips")
+    const g = imshow(imgc, name="<Shift>-click: add root tip, <Shift>-<ctrl>-click: remove tip, close window when done")
     const c = g["gui"]["canvas"]
     const add = Signal(XY{UserUnit}(1,1)) 
     const remove = Signal(XY{UserUnit}(1,1)) 
@@ -73,10 +74,11 @@ function getroots(stage::Vector{String}, home::String, base::String)
         push!(a, ImageView.annotate!(g, AnnotationPoint(xy.x.val, xy.y.val, shape='.', size=10, color=RGB(1,0,0))))
     end
     sigstart = map(c.mouse.buttonpress) do btn
-        println(btn.button, ",", btn.modifiers)
-        if btn.button == GtkReactive.BUTTON_PRESS
-            if btn.modifiers == GtkReactive.SHIFT
-                push!(add, btn.position)
+        if btn.button == 1
+            if btn.modifiers == 1 #shift
+                if !outside(pixelpoint(btn.position))
+                    push!(add, btn.position)
+                end
             elseif btn.modifiers == 5 #shift+ctrl
                 push!(remove, btn.position)
             end
@@ -108,7 +110,7 @@ function getroots(stage::Vector{String}, home::String, base::String)
     end
     wait(close)
     # return roots2
-    return [PixelPoint(xy.y.val, xy.x.val) for xy in value(roots)]
+    return pixelpoint.(value(roots))
     #=open(joinpath(home, "$(base)_stage$(stage_number)_tips.csv"), "w") do o
         for xy in value(roots)
             println(o, xy.x.val, ",", xy.y.val)

@@ -10,12 +10,7 @@ const speed = 4.127054775014554mm/dy # mean downwards speed along the rows of th
 const ρ = (0.8, 0.5) # how much do you trust each speed. This has been calculated from a bunch of datasets
 const Qρ = (0.38629498696108994*(1 - ρ[1]^2), 0.2584574519006643*(1 - ρ[2]^2))
 disk(r::Int) = [CartesianIndex(y,x) for y in -r:r for x in -r:r if sqrt(y^2 + x^2) ≤ r]
-w = 5
-const  inds = disk(w)
-border = 2w
-const sz = 1024
-outside(i::Float64) = i ≤ 1 + border || i ≥ sz - border
-outside(p::Vector{Float64}) = any(outside(i) for i in p)
+const inds = disk(w)
 function image_feedback(img::Image, p::SVector{2, Float64})
     ind = CartesianIndex(round.(Int, p)...)
     μ = mean(img[i + ind] for i in inds)
