@@ -47,7 +47,7 @@ function saveit(home::String, base::String, st::Stage, rs::Vector{Track})
     for r in rs
         x, y, n, I, lengths, times  = get_parameters(r, st.Δx)
         save2hdf5(home, base, x, y, I, lengths, times, st.index, r.index)
-        save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, st.index, r.index)
+        # save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, st.index, r.index)
     end
 end
 

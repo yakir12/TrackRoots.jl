@@ -45,7 +45,7 @@ end
     # save and plot
     TrackRoots.saveit(md.home, md.base, md.stages[1], rs[1:1])
     @test isfile(joinpath(md.home, "$(md.base)_stage_1_root_1_summary.h5"))
-    @test isfile(joinpath(md.home, "$(md.base)_stage_1_root_1_summary.gif"))
+    # @test isfile(joinpath(md.home, "$(md.base)_stage_1_root_1_summary.gif"))
 end
 
 
