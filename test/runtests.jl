@@ -26,7 +26,7 @@ rs = 0
     home, base, files = TrackRoots.startstopfiles(ndfile)
     @test home == datadep"test"[1:end-1]
     @test base == "204"
-    @test files == [["/home/yakir/.julia/datadeps/test/204_w1[None]_s1_t1.TIF", "/home/yakir/.julia/datadeps/test/204_w1[None]_s1_t20.TIF"]]
+    @test files == [joinpath.(datadep"test", ["204_w1[None]_s1_t1.TIF", "204_w1[None]_s1_t20.TIF"])]
 end
 
 @testset "ndfile" begin
