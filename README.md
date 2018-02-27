@@ -25,7 +25,7 @@ where `<ndfile>` is the path to the `.nd` file that you want to analyse. If you 
 4. Once you've finished selecting root tips in all of the stages, the program will automatically calibrate all the images, track all the roots, save the results into `hdf5` files and `gif` files (notifying you of its progress in each step). 
 5. You can close the Julia-terminal after it's done running (or keep it open to save time in the next run).
 
-### Rational 
+### Rationale 
 Recording, processing, and analysing videos of (behavioral) experiments usually includes some kind of manual work. This manual component might only include renaming and organizing video files, but could also mean manually tracking objects. The purpose of this package is to standardize your data at the earliest possible stage so that any subsequent manual involvement would be as easy and robust as possible. This allows for streamlining the flow of your data from the original raw-format video files to the results of your analysis.
 
 A typical workflow might look like this:
