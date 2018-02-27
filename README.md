@@ -8,6 +8,5 @@
 ```julia
 Pkg.clone("https://github.com/yakir12/TrackRoots.jl")
 Pkg.build("TrackRoots.jl")
-include(joinpath(Pkg.dir("TrackRoots"), "src", "loglikelihood.jl"))
 ```
 
