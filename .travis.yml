@@ -36,7 +36,6 @@ addons:
             - xvfb
             - xauth
             - libgtk-3-0
-            - ffmpeg
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./test/install_ffmpeg.sh ; fi
 script:
