@@ -6,7 +6,9 @@ include(joinpath(Pkg.dir("TrackRoots"), "src", "ndfiles.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "saving.jl"))
 
-function main(ndfile::String)
+export main
+
+function main(ndfile::String = open_dialog("Pick an `.nd` file", GtkNullContainer(), ("*.nd",)))
     # GUI to get the root tips
     home, base, files = startstopfiles(ndfile)
     tips = getroots.(files, home, base)
@@ -27,9 +29,6 @@ function main(ndfile::String)
     saveit.(md.home, md.base, md.stages, rs)
     info("Finished saving all the files")
 end
-
-# GUI to get the `.nd` file
-# ndfile = open_dialog("Pick an `.nd` file", GtkNullContainer(), ("*.nd",))
 
 end # module
 

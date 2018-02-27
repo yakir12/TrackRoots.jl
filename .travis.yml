@@ -37,6 +37,9 @@ addons:
             - xauth
             - libgtk-3-0
             - ffmpeg
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://launchpad.net/~mc3man/+archive/ubuntu/trusty-media/+files/ffmpeg_3.3.3~trusty2_amd64.deb ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo dpkg -i ffmpeg_3.3.3~trusty2_amd64.deb ; fi
 script:
     - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
     - if [[ `uname` = "Linux" ]]; then TESTCMD="xvfb-run julia"; else TESTCMD="julia"; fi

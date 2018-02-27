@@ -73,6 +73,7 @@ function getroots(stage::Vector{String}, home::String, base::String)
         push!(a, ImageView.annotate!(g, AnnotationPoint(xy.x.val, xy.y.val, shape='.', size=10, color=RGB(1,0,0))))
     end
     sigstart = map(c.mouse.buttonpress) do btn
+        println(btn.button, ",", btn.modifiers)
         if btn.button == 1
             if btn.modifiers == 1 # shift
                 push!(add, btn.position)
