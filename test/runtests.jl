@@ -22,12 +22,12 @@ ends = [Point(668.2858383593972, 988.693544734596), Point(642.4134353114358, 933
 md = 0
 rs = 0
 
-#=@testset "Tips" begin
+@testset "Tips" begin
     home, base, files = TrackRoots.Tips.startstopfiles(ndfile)
     @test home == datadep"test"[1:end-1]
     @test base == "204"
     @test files == [joinpath.(datadep"test", ["204_w1[None]_s1_t1.TIF", "204_w1[None]_s1_t20.TIF"])]
-end=#
+end
 
 @testset "ndfile" begin
     md = TrackRoots.nd2metadata(ndfile)
@@ -40,13 +40,13 @@ end
     @test all(c1.coordinates[end] == c2 for (c1, c2) in zip(rs, ends))
 end
 
-@testset "save" begin
+#=@testset "save" begin
     # save and plot
     pm = ProgressMeter.Progress(1)
     TrackRoots.saveit(md.home, md.base, pm, md.stages[1], rs[1:1])
     @test isfile(joinpath(md.home, "$(md.base)_stage_1_root_1_summary.h5"))
     @test isfile(joinpath(md.home, "$(md.base)_stage_1_root_1_summary.mp4"))
-end
+end=#
 
 
 

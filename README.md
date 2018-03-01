@@ -20,15 +20,38 @@ This is a `Julia` script for analysing light intensities as a function of time a
    using TrackRoots
    main()
    ``` 
-   You will be asked to navigate to the `.nd` file you want to analyse and select the root tips for each of the stages. **Note:** The first time this is executed will be significantly slower than all subsequent runs. While this is annoying, one simple remedy is to simply keep this terminal open and rerun `main()` every time you need to analyse another dataset.
+   You will be asked to navigate to the `.nd` file you want to analyse and select the root tips for each of the stages. 
+   
+**Note:** The first time this is executed will be significantly slower than all subsequent runs. While this is annoying, one simple remedy is to simply keep this terminal open and rerun `main()` every time you need to analyse another dataset.
 
 ## Detailed instructions
 
-1. The analysis is performed per `.nd` file. These files contain all the information needed to process the dark and bright 16 bit tif images for all stages. 
-2. After choosing the `.nd` file, you'll be presented with a composite image of the first stage. In order to help with identifying the correct root tip, this image shows you a composite of the first and last frames of the time-lapse. To select a root tip press `Shift-click`. A red dot will appear where you've clicked. To unselect press `Shift-Crtl-click` in the vicinity of the spot/s you want to remove.  
-   Additionally, `Ctrl-click` and drag somewhere inside the image. You'll see the typical rubberband selection, and once you let go the image display will zoom in on the selected region. If you click on the image without holding down Ctrl, you can drag the image to look at nearby regions. `Ctrl-double-click` on the image to restore the full region.
+1. The analysis is performed per `.nd` file. These files contain all the information needed to process the dark and bright 16-bit TIF images for all stages. 
+2. After choosing the `.nd` file, you'll be presented with a composite image of the first stage. In order to help with identifying the correct root tip, this image shows you a composite of the first and last frames of the time-lapse. To select a root tip `Shift-click` on the tip of a root you want to include in your analysis. A red dot will appear where you've clicked. To unselect press `Shift-Crtl-click` in the vicinity of the spot/s you want to remove. The closest spots will disappear.
+   To facilitate identification use the zoom: `Ctrl-click` and drag somewhere inside the image. You'll see the typical rubberband selection, and once you let go the image display will zoom in on the selected region. If you click on the image without holding down `Ctrl`, you can drag the image to look at nearby regions. `Ctrl-double-click` on the image to restore the full region.
    If you have a wheel mouse, zoom in again and scroll the wheel, which should cause the image to pan vertically. If you scroll while holding down `Shift`, it pans horizontally; hold down `Ctrl` and you affect the zoom setting.
 3. Close the window when you're done selecting root tips. This process will repeat for all the stages in that dataset. To skip a stage simply close the window without selecting any root tips.
 4. Once you've finished selecting root tips in all of the stages, the program will automatically calibrate all the images, track all the roots, and save the results into `hdf5` files and `mp4` files (notifying you of its progress in each step). 
 5. You can close the Julia-terminal after it's done running (or keep it open to save time in the next run).
+
+## Results
+
+Each root in each stage will result in two files: 
+1. `.mp4` video file summarizing the root
+2. `.h5` data file (`hdf5` format) containing all the data
+
+The video file shows:
+1. an image of the progression of the root and its track (`x` and `y` axis are in mm)
+2. a heat-map describing the intensity of the root tip as a function of time in hours and root length in mm (i.e. the distance along the root between the starting location of the tip and its current location)
+3. a plot of the intensity as a function of root length in mm
+4. a plot of the intensity as a function of time in hours
+
+as the video plays, these change as a function of time.
+
+The data files includes:
+1. *information*: the path to the `.nd` file, the stage number, and the root number.
+2. *intensities*: the intensities in relative units. Each row is a single root length, growing from the top to the bottom. Each column is a single point in time, progressing from the top to bottom
+3. *times*: the times in hours, corresponds to each column in the intensity matrix
+4. *lengths*: the lengths in millimeters, corresponds to each row in the intensity matrix
+5. *coordinates*: the `[x y]` coordinates in millimeters of the tip of the root as it moves through time
 

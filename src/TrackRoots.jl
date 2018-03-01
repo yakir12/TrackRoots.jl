@@ -14,7 +14,20 @@ const border = max(intensity_radius, weight_radius)
 outside(i::Float64) = i ≤ 1 + border || i ≥ sz - border
 outside(p::T) where T <: AbstractVector = any(outside(i) for i in p)
 
-# include(joinpath(Pkg.dir("TrackRoots"), "src", "Tips.jl"))
+include(joinpath(Pkg.dir("TrackRoots"), "src", "Tips.jl"))
+# using Gtk
+
+#=include(joinpath(Pkg.dir("TrackRoots"), "src", "gui.jl"))
+
+function get_ndfile_tips()
+    ndfile = open_dialog("Pick an `.nd` file", GtkNullContainer(), ("*.nd",))
+    info("Getting the tips of the roots…")
+    # GUI to get the root tips
+    home, base, files = startstopfiles(ndfile)
+    tips = getroots.(files, home, base)
+    info("Got the tips of the roots")
+    return (ndfile, tips)
+end=#
 
 include(joinpath(Pkg.dir("TrackRoots"), "src", "ndfiles.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))
@@ -32,7 +45,11 @@ function main(ndfile::String, tips::Vector{Vector{Point}})
     info("Finished saving all the files")
 end
 
-# main() = main(TrackRoots.Tips.get_ndfile_tips()...)
+function main() 
+    # ndfile, tips = get_ndfile_tips()
+    ndfile, tips = TrackRoots.Tips.get_ndfile_tips()
+    main(ndfile, tips)
+end
 
 end # module
 
