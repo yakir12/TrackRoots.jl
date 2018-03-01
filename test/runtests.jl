@@ -22,12 +22,12 @@ ends = [Point(668.2858383593972, 988.693544734596), Point(642.4134353114358, 933
 md = 0
 rs = 0
 
-@testset "basic" begin
+#=@testset "Tips" begin
     home, base, files = TrackRoots.Tips.startstopfiles(ndfile)
     @test home == datadep"test"[1:end-1]
     @test base == "204"
     @test files == [joinpath.(datadep"test", ["204_w1[None]_s1_t1.TIF", "204_w1[None]_s1_t20.TIF"])]
-end
+end=#
 
 @testset "ndfile" begin
     md = TrackRoots.nd2metadata(ndfile)
