@@ -14,7 +14,7 @@ const border = max(intensity_radius, weight_radius)
 outside(i::Float64) = i ≤ 1 + border || i ≥ sz - border
 outside(p::T) where T <: AbstractVector = any(outside(i) for i in p)
 
-include(joinpath(Pkg.dir("TrackRoots"), "src", "Tips.jl"))
+# include(joinpath(Pkg.dir("TrackRoots"), "src", "Tips.jl"))
 
 include(joinpath(Pkg.dir("TrackRoots"), "src", "ndfiles.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))
@@ -32,7 +32,7 @@ function main(ndfile::String, tips::Vector{Vector{Point}})
     info("Finished saving all the files")
 end
 
-main() = main(TrackRoots.Tips.get_ndfile_tips()...)
+# main() = main(TrackRoots.Tips.get_ndfile_tips()...)
 
 end # module
 
