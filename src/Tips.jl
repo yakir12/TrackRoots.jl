@@ -15,3 +15,6 @@ function get_ndfile_tips()
 end
 
 end # module
+
+# ndfile, tips = TrackRoots.Tips.get_ndfile_tips()
+

@@ -75,6 +75,7 @@ function getroots(stage::Vector{String}, home::String, base::String)
     end
     sigstart = map(c.mouse.buttonpress) do btn
         if btn.button == 1
+            println(btn.modifiers)
             if btn.modifiers == 1 #shift
                 if !TrackRoots.outside(pixelpoint(btn.position)) # make sure the point is inside, reject otherwise
                     push!(add, btn.position)

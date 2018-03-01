@@ -21,3 +21,4 @@ FixedPointNumbers
 Plots
 GR
 HDF5
+ProgressMeter

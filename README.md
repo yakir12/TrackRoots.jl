@@ -1,5 +1,5 @@
 # TrackRoots
-This is a `Julia` script for analysing light intensities as a function of time and space in time-lapse image stacks of *Arabidopsis* seedling roots.
+This is a `Julia` script for analysing light intensities as a function of time and space in time-lapse image stacks of seedling roots.
 
 [![Build Status](https://travis-ci.org/yakir12/TrackRoots.jl.svg?branch=master)](https://travis-ci.org/yakir12/TrackRoots.jl) [![Build status](https://ci.appveyor.com/api/projects/status/ea1xn7716t4xse0i/branch/master?svg=true)](https://ci.appveyor.com/project/yakir12/trackroots-jl/branch/master)
 
@@ -12,8 +12,9 @@ This is a `Julia` script for analysing light intensities as a function of time a
 4. (*not necessary*) To test the package, copy: `Pkg.test("TrackRoots")` and paste it in the Julia-terminal. Press enter to check if all the tests pass -> this may also take a long time.
 5. You can close the Julia-terminal after it's done running.
 
-## How to use
+## Quick start
 
+### If you don't have the coordinates of the tips of the roots
 1. Start Julia -> a Julia-terminal popped up.
 2. Copy and paste this in the newly opened Julia-terminal: 
    ```julia
