@@ -32,6 +32,8 @@ function main(ndfile::String, tips::Vector{Vector{Point}})
     info("Finished saving all the files")
 end
 
+main() = main(TrackRoots.Tips.get_ndfile_tips()...)
+
 end # module
 
 

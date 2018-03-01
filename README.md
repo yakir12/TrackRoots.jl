@@ -14,14 +14,16 @@ This is a `Julia` script for analysing light intensities as a function of time a
 
 ## Quick start
 
-### If you don't have the coordinates of the tips of the roots
 1. Start Julia -> a Julia-terminal popped up.
 2. Copy and paste this in the newly opened Julia-terminal: 
    ```julia
    using TrackRoots
-   main(<ndfile>)
+   main()
    ``` 
-   where `<ndfile>` is the path to the `.nd` file that you want to analyse. If you prefer, you can omit that argument, `main()`, in which case you will be asked to navigate to the desired `.nd` file. **Note:** The first time this is executed will be significantly slower than all subsequent runs. While this is annoying, one simple remedy is to simply keep this terminal open and rerun `main()` every time you need to analyse another dataset.
+   You will be asked to navigate to the `.nd` file you want to analyse and select the root tips for each of the stages. **Note:** The first time this is executed will be significantly slower than all subsequent runs. While this is annoying, one simple remedy is to simply keep this terminal open and rerun `main()` every time you need to analyse another dataset.
+
+## Detailed instructions
+
 3. After pressing Enter, you'll be presented with an image of the first stage. To select a root tip, hold the Shift button and left-click with your mouse. A red dot will appear where you've clicked. To unselect hold the Shift-Crtl buttons while left clicking in the vicinity of the spot/s you want to remove. Close the window when you're done. This process will repeat for all the stages in that dataset. To skip a stage simply close the window without selecting any root tips.
 4. Once you've finished selecting root tips in all of the stages, the program will automatically calibrate all the images, track all the roots, save the results into `hdf5` files and `gif` files (notifying you of its progress in each step). 
 5. You can close the Julia-terminal after it's done running (or keep it open to save time in the next run).
