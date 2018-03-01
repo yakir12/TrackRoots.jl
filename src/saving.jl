@@ -1,7 +1,10 @@
-using Plots, HDF5
-const nscale = 1
+using Plots, HDF5, Images, ProgressMeter
+const nscale = 4
 const sz2 = round(Int, sz/nscale)
-gr(legend = false)
+const sz3 = round(Int, 2sz2)
+gr()
+# default(size=(256,256)) #Plot canvas size
+# default(dpi=50/3) #Only for PyPlot - presently broken
 function get_parameters(r::Track, Δx::Unitful.Length)
     x = last.(r.coordinates)/4
     y = first.(r.coordinates)/4
@@ -37,7 +40,8 @@ save2hdf5(home, base, x, y, I, lengths, times, stage_number, root_number) = h5op
     attrs(gxy)["Description"] = "The [x y] coordinates in millimeters of the tip of the root as it moves through time."
 end
 
-function saveit(home::String, base::String, st::Stage, rs::Vector{Track})
+function saveit(home::String, base::String, pm::Progress, st::Stage, rs::Vector{Track})
+    isempty(rs) && return nothing
     imgs = [RGB.(imresize(load(tl.dark.path), (sz2, sz2))) for tl in st.timelapse]
     mM = mean(quantile(vec(green.(img)), [.1, .995]) for img in imgs)
     for img in imgs
@@ -47,28 +51,25 @@ function saveit(home::String, base::String, st::Stage, rs::Vector{Track})
     for r in rs
         x, y, n, I, lengths, times  = get_parameters(r, st.Δx)
         save2hdf5(home, base, x, y, I, lengths, times, st.index, r.index)
-        save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, st.index, r.index)
+        save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, st.index, r.index, pm)
     end
 end
 
-function save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, stage_number, root_number)
-    # Imax = maximum(I)
+function save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, stage_number, root_number, pm::Progress)
+    Imax = maximum(I)
+    filename = "$(base)_stage_$(stage_number)_root_$(root_number)_summary.mp4"
     anim = Animation()
-    for i in 1:2#n
-        plot(rand(2))
-        # h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
-        # plot!(x[1:i], y[1:i])
-        # h2 = plot([I[:,i]; 0], [lengths; lengths[end]], fill = 0, fillcolor = :green, linecolor = :green, xlim = (0, Imax), xticks = nothing,  yflip = true, xlabel = "Intensity")
-        # h3 = plot(times, I[i, :], fill = 0, fillcolor = :blue, linecolor = :blue, ylim = (0, Imax), yticks = nothing, ylabel = "Intensity")
-        # h4 = heatmap(times, lengths, I, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true)
-        # plot!(times[[1, end]], [lengths[i], lengths[i]], color = :blue)
-        # plot!([times[i], times[i]], lengths[[1, end]], color = :green)
-        # plot(h3, h1, h4, h2, size = (2sz2, 2sz2))
+    for i in 1:n
+        h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
+        plot!(x[1:i], y[1:i])
+        h2 = plot([I[:,i]; 0], [lengths; lengths[end]], fill = 0, fillcolor = :green, linecolor = :green, xlim = (0, Imax), xticks = nothing,  yflip = true, xlabel = "Intensity")
+        h3 = plot(times, I[i, :], fill = 0, fillcolor = :blue, linecolor = :blue, ylim = (0, Imax), yticks = nothing, ylabel = "Intensity")
+        h4 = heatmap(times, lengths, I, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true, colorbar = false)
+        plot!(times[[1, end]], [lengths[i], lengths[i]], color = :blue)
+        plot!([times[i], times[i]], lengths[[1, end]], color = :green)
+        plot(h3, h1, h4, h2, legend = false, size=(sz3, sz3), dpi=50/3)
         Plots.frame(anim)
+        next!(pm)
     end
-    gif(anim, joinpath(home, "$(base)_stage_$(stage_number)_root_$(root_number)_summary.gif"), fps = 30)
+    mp4(anim, joinpath(home, filename), fps = 30)
 end
-
-
-
-

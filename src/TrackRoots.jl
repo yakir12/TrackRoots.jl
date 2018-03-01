@@ -1,41 +1,38 @@
 module TrackRoots
 
-using Gtk
+using ProgressMeter
 
-w = 5
-border = 2w
+export main
+
+disk(r::Int) = [CartesianIndex(y,x) for y in -r:r for x in -r:r if sqrt(y^2 + x^2) ≤ r]
+
 const sz = 1024
+const intensity_radius = 3
+const weight_radius = 5
+const border = max(intensity_radius, weight_radius)
+
 outside(i::Float64) = i ≤ 1 + border || i ≥ sz - border
 outside(p::T) where T <: AbstractVector = any(outside(i) for i in p)
 
-include(joinpath(Pkg.dir("TrackRoots"), "src", "gui.jl"))
+include(joinpath(Pkg.dir("TrackRoots"), "src", "Tips.jl"))
+
 include(joinpath(Pkg.dir("TrackRoots"), "src", "ndfiles.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "saving.jl"))
 
-export main
-
-function main(ndfile::String = open_dialog("Pick an `.nd` file", GtkNullContainer(), ("*.nd",)))
-    # GUI to get the root tips
-    home, base, files = startstopfiles(ndfile)
-    tips = getroots.(files, home, base)
-    info("Got the tips of the roots")
-
-    # get the metadata
+function main(ndfile::String, tips::Vector{Vector{Point}})
+    info("Calibrating the images…")
     md = nd2metadata(ndfile)
-    info("Calibration complete")
-    # filter empty stages
-    k = find(isempty, tips)
-    deleteat!(tips, k)
-    deleteat!(md.stages, k)
-    # track the roots
+    info("Calibration complete. Tracking the roots…")
     rs = map(mytrack, md.stages, tips)
-    info("Tracked all the roots")
-
-    # save and plot
-    saveit.(md.home, md.base, md.stages, rs)
+    info("Tracked all the roots. Preparing to save all the results…")
+    pm = Progress(sum(st.n*length(r) for (st, r) in zip(md.stages, rs)), 1, "Saving the gif files")
+    fun(st::Stage, r::Vector{Track}) = saveit(md.home, md.base, pm, st, r) 
+    map(fun, md.stages, rs)
     info("Finished saving all the files")
 end
 
 end # module
 
+
+# using TrackRoots; ndfile, tips = ("/home/yakir/.julia/datadeps/all/2/204.nd", Array{StaticArrays.SVector{2,Float64},1}[StaticArrays.SVector{2,Float64}[[580.412, 640.352]], StaticArrays.SVector{2,Float64}[]]); TrackRoots.main(ndfile, tips)

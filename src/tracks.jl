@@ -1,29 +1,21 @@
 using Kalman, Unitful, FileIO, Colors, FixedPointNumbers, StaticArrays
 const Image = Matrix{Gray{N0f16}}
+const Point = SVector{2, Float64}
 import Base:+
-+(p::SVector{2, Float64}, i::CartesianIndex{2}) = p + SVector{2, Float64}(i.I...)
-+(i::CartesianIndex{2}, p::SVector{2, Float64}) = p + i
++(p::Point, i::CartesianIndex{2}) = p + Point(i.I...)
++(i::CartesianIndex{2}, p::Point) = p + i
 # StatsBase, OffsetArrays, Colors, FixedPointNumbers, AxisArrays, IntervalSets
-const mm = u"mm"
-const dy = u"d"
-const speed = 4.127054775014554mm/dy # mean downwards speed along the rows of the image
+const speed = 4.127054775014554u"mm/d" # mean downwards speed along the rows of the image
 const ρ = (0.8, 0.5) # how much do you trust each speed. This has been calculated from a bunch of datasets
 const Qρ = (0.38629498696108994*(1 - ρ[1]^2), 0.2584574519006643*(1 - ρ[2]^2))
-disk(r::Int) = [CartesianIndex(y,x) for y in -r:r for x in -r:r if sqrt(y^2 + x^2) ≤ r]
-const inds = disk(w)
-function image_feedback(img::Image, p::SVector{2, Float64})
+const weight_disk = disk(weight_radius)
+function image_feedback(img::Image, p::Point)
     ind = CartesianIndex(round.(Int, p)...)
-    μ = mean(img[i + ind] for i in inds)
-    S = sum(max(0, img[i + ind] - μ) for i in inds)
-    sum(max(0, img[i + ind] - μ)*(i + p) for i in inds)/S
+    μ = mean(img[i + ind] for i in weight_disk)
+    S = sum(max(0, img[i + ind] - μ) for i in weight_disk)
+    sum(max(0, img[i + ind] - μ)*(i + p) for i in weight_disk)/S
 end
-"""
-`v` is the typical velocity vector and
-`0 < ρ <= 1` is a parameter regulating how strongly
-the system is attracted to attain velocity `v`.
-"""
 function initiatemodel(vrow::Float64)
-    # @assert 0 < ρ ≤ 1 "ρ has to be larger than zero and less or equal to one."
     p0 = SVector(NaN, NaN, vrow, 0.0)
     P0 = 10*@SMatrix eye(4)
     A = SMatrix{4, 4, Float64}([1 0 1 0
@@ -37,21 +29,20 @@ function initiatemodel(vrow::Float64)
     R = 2*@SMatrix eye(2)
     LinearHomogSystem(p0, P0, A, b, Q, y, C, R)
 end
-r = 3
-const inds2 = disk(r)
-function getintensity(img::Image, p::SVector{2, Float64})
+const intensity_disk = disk(intensity_radius)
+function getintensity(img::Image, p::Point)
     ind = CartesianIndex(round.(Int, p)...)
-    sum(img[i + ind] for i in inds2)
+    sum(img[i + ind] for i in intensity_disk)
 end
 struct Track
     lengths::Vector{Float64}
-    coordinates::Vector{SVector{2, Float64}}
+    coordinates::Vector{Point}
     times::Vector{Float64}
     intensities::Vector{Vector{Float64}}
     index::Int
-    function Track(p::SVector{2, Float64}, st::Stage, index::Int)
+    function Track(p::Point, st::Stage, index::Int)
         lengths = Float64[]
-        coordinates = SVector{2, Float64}[]
+        coordinates = Point[]
         times = Float64[]
         intensities = Vector{Float64}[]
         sizehint!(lengths, st.n)
@@ -68,7 +59,7 @@ struct Track
     end
 end
 
-function updatetrack(t::Track, img::Image, p::SVector{2, Float64}, time::Float64)
+function updatetrack(t::Track, img::Image, p::Point, time::Float64)
     push!(t.lengths, t.lengths[end] + norm(t.coordinates[end] - p))
     push!(t.coordinates, p)
     push!(t.times, time)
@@ -83,7 +74,7 @@ mutable struct Root
     x::SVector{4, Float64}
     P::SMatrix{4, 4, Float64}
     grow::Bool
-    function Root(p::SVector{2, Float64}, vrow::Float64, st::Stage, index::Int)
+    function Root(p::Point, vrow::Float64, st::Stage, index::Int)
         model = initiatemodel(vrow)
         track = Track(p, st, index)
         x = SVector(p..., model.x0[3:4]...)
@@ -92,14 +83,15 @@ mutable struct Root
     end
 end
 
-function mypredict!(r::Root, img::Image, t1, t2)
+function mypredict!(r::Root, img::Image, t1::Float64, t2::Float64)
     x, Ppred, A = Kalman.predict!(t1, r.x, r.P, t2, r.model)
-    y = image_feedback(img, SVector{2, Float64}(x[1:2]...))
+    y = image_feedback(img, Point(x[1:2]...))
     _, obs, C, R = Kalman.observe!(t1, x, r.P, t2, y, r.model)
     r.x, r.P, yres, S, K = Kalman.correct!(x, Ppred, obs, C, R, r.model)
 end
 
-function mytrack(st::Stage, ps::Vector{SVector{2, Float64}})
+function mytrack(st::Stage, ps::Vector{Point})
+    isempty(ps) && return Track[]
     vrow = uconvert(NoUnits, st.Δt*speed/st.Δx)
     roots = [Root(p, vrow, st, i) for (i, p) in enumerate(ps)]
     for (tl1, tl2) in zip(st.timelapse[2:end], [st.timelapse[3:end]; st.timelapse[end]])
@@ -107,7 +99,7 @@ function mytrack(st::Stage, ps::Vector{SVector{2, Float64}})
         for r in roots
             if r.grow
                 mypredict!(r, img, tl1.dark.time, tl2.dark.time)
-                updatetrack(r.track, img, SVector{2, Float64}(r.x[1:2]), tl2.dark.time)
+                updatetrack(r.track, img, Point(r.x[1:2]), tl2.dark.time)
                 if outside(r.x[1:2])
                     r.grow = false
                 end
