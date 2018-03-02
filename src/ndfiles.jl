@@ -177,6 +177,7 @@ function pixel_width(timelapses::Vector{Vector{FilePair}})
         filter!(i -> 200 < i < 650, x)
         isempty(x) || return 80u"mm"/6/mean(x) # in mm
     end
+    warning("failed to automatically calibrate the images. Assuming pixels are ~0.04 mm wide, this estimation would correspond to about 350 pixels between two grid lines (please check to make sure this estimation is not too far off)")
     return 0.03819517804872148u"mm"
 end
 

@@ -1,19 +1,16 @@
 module TrackRoots
 
+using Revise, NDFiles, Tips
+ndfile = "/home/yakir/.julia/datadeps/all/7/left-204;mid-184-2-1;right-dr5.nd"
+md = nd2metadata(ndfile)
+root_tips!.(md.stages)
+
+
 using ProgressMeter
 
 export main
 
-disk(r::Int) = [CartesianIndex(y,x) for y in -r:r for x in -r:r if sqrt(y^2 + x^2) ≤ r]
-
-const sz = 1024
-const intensity_radius = 3
-const weight_radius = 5
-const border = max(intensity_radius, weight_radius)
-
-outside(i::Float64) = i ≤ 1 + border || i ≥ sz - border
-outside(p::T) where T <: AbstractVector = any(outside(i) for i in p)
-
+include(joinpath(Pkg.dir("TrackRoots"), "src", "utils.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "Tips.jl"))
 # using Gtk
 
@@ -45,13 +42,18 @@ function main(ndfile::String, tips::Vector{Vector{Point}})
     info("Finished saving all the files")
 end
 
-function main() 
-    # ndfile, tips = get_ndfile_tips()
-    ndfile, tips = TrackRoots.Tips.get_ndfile_tips()
-    main(ndfile, tips)
-end
+main(ndfile::String) = main(TrackRoots.Tips.get_ndfile_tips(ndfile)...)
+
+main() = main(TrackRoots.Tips.get_ndfile_tips()...)
 
 end # module
 
 
 # using TrackRoots; ndfile, tips = ("/home/yakir/.julia/datadeps/all/2/204.nd", Array{StaticArrays.SVector{2,Float64},1}[StaticArrays.SVector{2,Float64}[[580.412, 640.352]], StaticArrays.SVector{2,Float64}[]]); TrackRoots.main(ndfile, tips)
+
+# ndfile = "/home/yakir/.julia/datadeps/all/7/left-204;mid-184-2-1;right-dr5.nd"
+# tips =  [SVector{2,Float64}[[719.101, 227.214]], SVector{2,Float64}[], SVector{2,Float64}[], SVector{2,Float64}[]]
+
+# main("/home/yakir/.julia/datadeps/all/5/cle44-luc-bfa3.nd")
+
+# tips = 

@@ -61,7 +61,7 @@ function save2gif(home, base, x, y, n, I, lengths, times, formatlabel, imgs, sta
     anim = Animation()
     for i in 1:n
         h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
-        plot!(x[1:i], y[1:i])
+        plot!(x[1:i], y[1:i], color = :red)
         h2 = plot([I[:,i]; 0], [lengths; lengths[end]], fill = 0, fillcolor = :green, linecolor = :green, xlim = (0, Imax), xticks = nothing,  yflip = true, xlabel = "Intensity")
         h3 = plot(times, I[i, :], fill = 0, fillcolor = :blue, linecolor = :blue, ylim = (0, Imax), yticks = nothing, ylabel = "Intensity")
         h4 = heatmap(times, lengths, I, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true, colorbar = false)
