@@ -1,9 +1,7 @@
-using TrackRoots, StaticArrays
+using TrackRoots, Unitful
 using Base.Test
-
 using DataDeps
 ENV["DATADEPS_ALWAY_ACCEPT"]=true
-
 RegisterDataDep(
                 "test",
                 "These are test data including an `nd` file and multiple dark and light timelapse 16 bit TIF images (1.6 GB total).",
@@ -11,45 +9,32 @@ RegisterDataDep(
                 "ec5ea50ffcecf5875c34f9a234fc5a5c71cd34b1c838b2eacd2b695853ddb253",
                 post_fetch_method=unpack
                )
-
 files = readdir(datadep"test")
 i = findfirst(x -> last(splitext(x)) == ".nd", files)
 ndfile = joinpath(datadep"test", files[i])
-
 import TrackRoots:Point
+startpoints = [[Point(649, 993), Point(618, 919)], Point[]]
+endpoints = [[Point(668.2858383593972, 988.693544734596), Point(642.4134353114358, 933.5568063214348)], Point[]]
 
-const Point = SVector{2, Float64}
-tips = [Point(649, 993), Point(618, 919)]
-ends = [Point(668.2858383593972, 988.693544734596), Point(642.4134353114358, 933.5568063214348)]
 
-md = 0
-rs = 0
+@testset "all" begin
 
-@testset "Tips" begin
-    home, base, files = TrackRoots.Tips.startstopfiles(ndfile)
-    @test home == datadep"test"[1:end-1]
-    @test base == "204"
-    @test files == [joinpath.(datadep"test", ["204_w1[None]_s1_t1.TIF", "204_w1[None]_s1_t20.TIF"])]
+    stages = TrackRoots.nd2stages(ndfile)
+    @test stages[1].id == 1
+    @test string(stages[1].base, ".nd") == files[1]
+
+    # startpoints = TrackRoots.get_startpoints.(stages)
+
+    calibstages = TrackRoots.stages2calib(stages)
+    @test calibstages[1].Δt == 0.24970093565551857u"hr"
+    @test calibstages[1].Δx == 0.03445036016285625u"mm"
+
+    tracks = TrackRoots.trackroot.(calibstages, startpoints)
+    @test tracks[1][1].id == 1
+    @test tracks[1][1].lengths[1] == tracks[1][1].times[1]
+
+    TrackRoots.saveit(calibstages, tracks)
+    @test isfile(joinpath(stages[1].home, "$(stages[1].base)_stage_1_root_1_summary.h5"))
+    @test isfile(joinpath(stages[1].home, "$(stages[1].base)_stage_1_root_1_summary.mp4"))
+
 end
-
-@testset "ndfile" begin
-    md = TrackRoots.nd2metadata(ndfile)
-    @test md.n == 1 
-end
-
-@testset "track" begin
-    rs = TrackRoots.mytrack(md.stages[1], tips)
-    @test all(c1.coordinates[1] == c2 for (c1, c2) in zip(rs, tips))
-    @test all(c1.coordinates[end] == c2 for (c1, c2) in zip(rs, ends))
-end
-
-#=@testset "save" begin
-    # save and plot
-    pm = ProgressMeter.Progress(1)
-    TrackRoots.saveit(md.home, md.base, pm, md.stages[1], rs[1:1])
-    @test isfile(joinpath(md.home, "$(md.base)_stage_1_root_1_summary.h5"))
-    @test isfile(joinpath(md.home, "$(md.base)_stage_1_root_1_summary.mp4"))
-end=#
-
-
-
