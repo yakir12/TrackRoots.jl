@@ -1,10 +1,4 @@
-# module Saves
-
 using Plots, HDF5, ProgressMeter
-
-# import ..sz, ..Track, ..CalibStage
-
-# export saveit
 
 const nscale = 4
 const sz2 = round(Int, sz/nscale)
@@ -93,6 +87,3 @@ function save2gif(home::String, base::String, stage_number::Int, root_number::In
     # Plots.svg(joinpath(home, filename))
     mp4(anim, joinpath(home, filename), fps = round(Int, n/5))
 end
-
-# end # module
-

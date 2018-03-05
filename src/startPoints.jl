@@ -1,10 +1,4 @@
-# module StartPoints
-
 using Images, ImageView, GtkReactive
-
-# import ..outside, ..Point, ..Stage
-
-# export get_startpoints
 
 get_point(p::XY{UserUnit}) = Point(p.y.val, p.x.val)
 
@@ -66,9 +60,3 @@ function get_startpoints(f1::String, fn::String)
 end
 
 get_startpoints(stage::Stage) = get_startpoints(stage.timelapse[1].dark, stage.timelapse[end].dark)
-
-# end # module
-
-# ndfile::String = open_dialog("Pick an `.nd` file", GtkNullContainer(), ("*.nd",)))
-# ndfile, tips = TrackRoots.Tips.get_ndfile_tips()
-

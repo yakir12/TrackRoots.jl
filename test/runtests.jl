@@ -33,8 +33,8 @@ endpoints = [[Point(668.2858383593972, 988.693544734596), Point(642.413435311435
     @test tracks[1][1].id == 1
     @test tracks[1][1].lengths[1] == tracks[1][1].times[1]
 
-    TrackRoots.saveit(calibstages, tracks)
-    @test isfile(joinpath(stages[1].home, "$(stages[1].base)_stage_1_root_1_summary.h5"))
-    @test isfile(joinpath(stages[1].home, "$(stages[1].base)_stage_1_root_1_summary.mp4"))
+    # TrackRoots.saveit(calibstages, tracks)
+    # @test isfile(joinpath(stages[1].home, "$(stages[1].base)_stage_1_root_1_summary.h5"))
+    # @test isfile(joinpath(stages[1].home, "$(stages[1].base)_stage_1_root_1_summary.mp4"))
 
 end

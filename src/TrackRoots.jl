@@ -1,14 +1,16 @@
 __precompile__()
 module TrackRoots
 
+export main
+
 using Gtk
 
 include(joinpath(Pkg.dir("TrackRoots"), "src", "utils.jl"))
-include(joinpath(Pkg.dir("TrackRoots"), "src", "Stages.jl"))
-include(joinpath(Pkg.dir("TrackRoots"), "src", "StartPoints.jl"))
-include(joinpath(Pkg.dir("TrackRoots"), "src", "Calibrates.jl"))
-include(joinpath(Pkg.dir("TrackRoots"), "src", "Tracks.jl"))
-include(joinpath(Pkg.dir("TrackRoots"), "src", "Saves.jl"))
+include(joinpath(Pkg.dir("TrackRoots"), "src", "stages.jl"))
+include(joinpath(Pkg.dir("TrackRoots"), "src", "startPoints.jl"))
+include(joinpath(Pkg.dir("TrackRoots"), "src", "calibrates.jl"))
+include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))
+include(joinpath(Pkg.dir("TrackRoots"), "src", "saves.jl"))
 
 function main(ndfile::String = open_dialog("Pick an `.nd` file", GtkNullContainer(), ("*.nd",)))
     stages = nd2stages(ndfile)

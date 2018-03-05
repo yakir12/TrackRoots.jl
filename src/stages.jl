@@ -1,8 +1,3 @@
-# __precompile__()
-# module Stages
-
-# export Stage, nd2stages
-
 """
 FilePair(dark, light)
 A type that holds the file data for both the dark and light images
@@ -94,6 +89,3 @@ nd2stages(file::String) = open(file, "r") do o
     end
     return stages
 end
-
-# end # module
-

@@ -1,9 +1,4 @@
-# __precompile__()
-# module Calibrates
-
 using ImageFiltering, ImageFeatures, Unitful, Distances
-
-# export stages2calib, CalibStage
 
 const h_kernel = Kernel.DoG((5, 180), (5*sqrt(2), 180), (31, 901))
 const α = pi/2 + linspace(-.05, .05, 10)
@@ -96,6 +91,3 @@ function stages2calib(stages::Vector{Stage})
     end
     return calibstages
 end
-
-# end # module
-

@@ -1,11 +1,4 @@
-# __precompile__()
-# module Tracks
-
-# import ..Point, ..disk, ..weight_radius, ..intensity_radius, ..outside, ..CalibStage
-
 using Kalman
-
-# export trackroot, Track
 
 import Base:+
 +(p::Point, i::CartesianIndex{2}) = p + Point(i.I...)

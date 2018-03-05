@@ -23,6 +23,8 @@ This is a `Julia` script for analysing light intensities as a function of time a
    
 **Note:** The first time this is executed will be significantly slower than all subsequent runs. While this is annoying, one simple remedy is to simply keep this terminal open and rerun `main()` every time you need to analyse another dataset.
 
+[![Watch the video](https://raw.github.com/yakir12/TrackRoots/master/docs/front.png)](vimeo.com/258615822)
+
 ## Detailed instructions
 1. The analysis is performed per `.nd` file. These files contain all the information needed to process the dark and bright 16-bit TIF images for all stages. 
 2. After choosing the `.nd` file, you'll be presented with a composite image of the first stage. In order to help with identifying the correct root tip, this image shows you a composite of the first and last frames of the time-lapse. To select a root tip `Shift-click` on the tip of a root you want to include in your analysis. A red dot will appear where you've clicked. To unselect press `Shift-Crtl-click` in the vicinity of the spot/s you want to remove. The closest spots will disappear.
