@@ -1,11 +1,9 @@
 julia 0.6
 
-Cairo 0.4.0 0.4.1
 ImageFiltering
 ImageFeatures
 Distances
 StaticArrays
-Kalman
 Gtk
 Images
 ImageView
