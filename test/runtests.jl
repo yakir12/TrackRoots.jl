@@ -1,5 +1,6 @@
 using TrackRoots, StaticArrays
 using Base.Test
+
 using DataDeps
 ENV["DATADEPS_ALWAY_ACCEPT"]=true
 
@@ -14,6 +15,8 @@ RegisterDataDep(
 files = readdir(datadep"test")
 i = findfirst(x -> last(splitext(x)) == ".nd", files)
 ndfile = joinpath(datadep"test", files[i])
+
+import TrackRoots:Point
 
 const Point = SVector{2, Float64}
 tips = [Point(649, 993), Point(618, 919)]
