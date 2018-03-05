@@ -38,3 +38,10 @@ endpoints = [[Point(668.2858383593972, 988.693544734596), Point(642.413435311435
     # @test isfile(joinpath(stages[1].home, "$(stages[1].base)_stage_1_root_1_summary.mp4"))
 
 end
+
+@testset "utils" begin
+
+    a = TrackRoots.disk(1)
+    @test all(CartesianIndex(i) ∈ a for i in [(-1,0), (0,-1), (0,0), (0,1), (1,0)])
+
+end
