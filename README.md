@@ -1,9 +1,11 @@
 # TrackRoots
 This is a `Julia` script for analysing light intensities as a function of time and space in time-lapse image stacks of seedling roots.
 
-| macOS & Linux | [![Build Status](https://travis-ci.org/yakir12/TrackRoots.jl.svg?branch=master)](https://travis-ci.org/yakir12/TrackRoots.jl) |
-| Windows | [![Build status](https://ci.appveyor.com/api/projects/status/ea1xn7716t4xse0i/branch/master?svg=true)](https://ci.appveyor.com/project/yakir12/trackroots-jl/branch/master) |
-| Coveralls | [![Coverage Status](https://coveralls.io/repos/github/yakir12/TrackRoots.jl/badge.svg?branch=master)](https://coveralls.io/github/yakir12/TrackRoots.jl?branch=master) |
+macOS & Linux: [![Build Status](https://travis-ci.org/yakir12/TrackRoots.jl.svg?branch=master)](https://travis-ci.org/yakir12/TrackRoots.jl)
+
+Windows: [![Build status](https://ci.appveyor.com/api/projects/status/ea1xn7716t4xse0i/branch/master?svg=true)](https://ci.appveyor.com/project/yakir12/trackroots-jl/branch/master)
+
+Coveralls: [![Coverage Status](https://coveralls.io/repos/github/yakir12/TrackRoots.jl/badge.svg?branch=master)](https://coveralls.io/github/yakir12/TrackRoots.jl?branch=master)
 
 ## How to install
 1. If you haven't already, install the current release of [Julia](https://julialang.org/downloads/) -> you should be able to launch it (some icon on the Desktop or some such).
