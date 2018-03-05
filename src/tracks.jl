@@ -15,6 +15,7 @@ const intensity_disk = disk(intensity_radius)
 
 function image_feedback(img::Image, p::Point)
     ind = CartesianIndex(round.(Int, p)...)
+    # μ = quantile([img[i + ind] for i in weight_disk], .8)
     μ = mean(img[i + ind] for i in weight_disk)
     S = sum(max(0, img[i + ind] - μ) for i in weight_disk)
     sum(max(0, img[i + ind] - μ)*(i + p) for i in weight_disk)/S
@@ -90,13 +91,19 @@ end
 
 function correctpredict!(r::Root, img::Image, t1::Float64, t2::Float64)
     x, Ppred, A = Kalman.predict!(t1, r.x, r.P, t2, r.model)
-    # if outside(x[1:2])
-        # r.x = x
-        # return nothing
-    # end
+    if outside(x[1:2])
+        r.grow = false
+        return nothing
+    end
     y = image_feedback(img, Point(x[1:2]...))
     _, obs, C, R = Kalman.observe!(t1, x, r.P, t2, y, r.model)
-    r.x, r.P, yres, S, K = Kalman.correct!(x, Ppred, obs, C, R, r.model)
+    x, P, yres, S, K = Kalman.correct!(x, Ppred, obs, C, R, r.model)
+    if outside(r.x[1:2])
+        r.grow = false
+        return nothing
+    end
+    r.x = x
+    r.P = P
     return nothing
 end
 
@@ -111,9 +118,6 @@ function trackroot(st::CalibStage, startpoints::Vector{Point})
             if r.grow
                 correctpredict!(r, img, tl1.time, tl2.time)
                 updatetrack(t, img, Point(r.x[1:2]), tl2.time)
-                if outside(r.x[1:2])
-                    r.grow = false
-                end
             end
         end
     end
@@ -121,4 +125,3 @@ function trackroot(st::CalibStage, startpoints::Vector{Point})
 end
 
 # end # module
-
