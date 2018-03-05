@@ -6,7 +6,7 @@ import Base:+
 
 const Image = Matrix{Gray{N0f16}}
 
-const speed = 0.4#0.1719606156256064 # mean downwards speed along the rows of the image in mm per hour
+const speed = 0.1719606156256064 # mean downwards speed along the rows of the image in mm per hour
 const ρ = (0.8, 0.5) # how much do you trust each speed. This has been calculated from a bunch of datasets
 const Qρ = (0.38629498696108994*(1 - ρ[1]^2), 0.2584574519006643*(1 - ρ[2]^2))
 
@@ -90,9 +90,14 @@ end
 
 function correctpredict!(r::Root, img::Image, t1::Float64, t2::Float64)
     x, Ppred, A = Kalman.predict!(t1, r.x, r.P, t2, r.model)
+    # if outside(x[1:2])
+        # r.x = x
+        # return nothing
+    # end
     y = image_feedback(img, Point(x[1:2]...))
     _, obs, C, R = Kalman.observe!(t1, x, r.P, t2, y, r.model)
     r.x, r.P, yres, S, K = Kalman.correct!(x, Ppred, obs, C, R, r.model)
+    return nothing
 end
 
 function trackroot(st::CalibStage, startpoints::Vector{Point})
