@@ -6,7 +6,7 @@ disk(r::Int) = [CartesianIndex(y,x) for y in -r:r for x in -r:r if sqrt(y^2 + x^
 
 const sz = 1024
 const intensity_radius = 3
-const weight_radius = 5
+const weight_radius = 10
 const border = max(intensity_radius, weight_radius) + 1
 
 outside(i::Float64) = i ≤ 1 + border || i ≥ sz - border

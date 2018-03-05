@@ -41,8 +41,10 @@ alt="TrackRoots tutorial video" width="400" height="400" border="10" /></a>
 ## Results
 Each root in each stage will result in two files: 
 1. `.mp4` video file summarizing the root.
-2. `.h5` data file (`hdf5` format) containing all the data.
+2. `.h5` data file ([`hdf5` format](https://en.wikipedia.org/wiki/Hierarchical_Data_Format#HDF5)) containing all the data.
+These files are saved in the same directory the `.nd` file is in.
 
+### 1. Video
 The video file shows:
 1. An image of the progression of the root and its track (`x` and `y` axis are in mm).
 2. A heat-map describing the intensity of the root tip as a function of time in hours and root length in mm (i.e. the distance along the root between the starting location of the tip and its current location).
@@ -51,6 +53,7 @@ The video file shows:
 
 as the video plays, these change as a function of time.
 
+### 2. Data
 The data files includes:
 1. **Information**: the path to the `.nd` file, the stage number, and the root number.
 2. **Intensities**: the intensities in relative units. Each row is a single root length, growing from the top to the bottom. Each column is a single point in time, progressing from the top to bottom.

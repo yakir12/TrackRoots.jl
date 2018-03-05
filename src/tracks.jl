@@ -6,7 +6,7 @@ import Base:+
 
 const Image = Matrix{Gray{N0f16}}
 
-const speed = 4.127054775014554u"mm"/u"d" # mean downwards speed along the rows of the image
+const speed = 0.1719606156256064 # mean downwards speed along the rows of the image in mm per hour
 const ρ = (0.8, 0.5) # how much do you trust each speed. This has been calculated from a bunch of datasets
 const Qρ = (0.38629498696108994*(1 - ρ[1]^2), 0.2584574519006643*(1 - ρ[2]^2))
 
@@ -97,7 +97,7 @@ end
 
 function trackroot(st::CalibStage, startpoints::Vector{Point})
     isempty(startpoints) && return Track[]
-    vrow = uconvert(NoUnits, uconvert(u"d", st.Δt)*speed/st.Δx)
+    vrow = speed/st.speed
     roots = [Root(p, vrow) for p in startpoints]
     tracks = [Track(p, st, i) for (i, p) in enumerate(startpoints)]
     for (tl1, tl2) in zip(st.timelapse[2:end], [st.timelapse[3:end]; st.timelapse[end]])

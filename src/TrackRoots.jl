@@ -15,9 +15,13 @@ include(joinpath(Pkg.dir("TrackRoots"), "src", "saves.jl"))
 function main(ndfile::String = open_dialog("Pick an `.nd` file", GtkNullContainer(), ("*.nd",)))
     stages = nd2stages(ndfile)
     startpoints = get_startpoints.(stages)
+    info("Aquired the `.nd` file and the starting points of the root-tips. Calibrating the data…")
     calibstages = stages2calib(stages)
+    info("Calibrated the data. Tracking the roots…")
     tracks = trackroot.(calibstages, startpoints)
+    info("Tracked the roots. Saving the results…")
     saveit(calibstages, tracks)
+    info("Done!")
 end
 
 end # module

@@ -1,6 +1,6 @@
 using Plots, HDF5, ProgressMeter
 
-const nscale = 4
+const nscale = 2
 const sz2 = round(Int, sz/nscale)
 const sz3 = round(Int, 2sz2)
 gr()
@@ -8,7 +8,7 @@ default(show=false)
 # default(size=(256,256)) #Plot canvas size
 # default(dpi=50/3) #Only for PyPlot - presently broken
 
-function get_parameters(track::Track, Δx::Unitful.Length)
+function get_parameters(track::Track, Δx::Float64)
     x = last.(track.coordinates)
     y = first.(track.coordinates)
     n = length(track.lengths)
@@ -17,7 +17,7 @@ function get_parameters(track::Track, Δx::Unitful.Length)
     for i in 1:n, j in 1:i
         intensities[j,i] = track.intensities[i][j] - m
     end
-    lengths = ustrip.(track.lengths*Δx)
+    lengths = track.lengths*Δx
     times = track.times
     return (x, y, n, intensities, lengths, times)
 end
@@ -36,7 +36,7 @@ function saveit(st::CalibStage, rs::Vector{Track}, pm::Progress = Progress(1))
     for img in imgs
         img .= imadjustintensity(img, mM)
     end
-    formatlabel(x::T) where T <: Real = round(ustrip(st.Δx*x*nscale), 1)
+    formatlabel(x::T) where T <: Real = round(st.Δx*x*nscale, 1)
     for r in rs
         x, y, n, intensities, lengths, times = get_parameters(r, st.Δx)
         save2hdf5(st.home, st.base, st.id, r.id, x, y, intensities, lengths, times)
@@ -73,7 +73,7 @@ function save2gif(home::String, base::String, stage_number::Int, root_number::In
     anim = Animation()
     for i in 1:n
         h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
-        plot!(x[1:i], y[1:i], color = :red)
+        plot!(x[1:i], y[1:i], color = :red, linewidth = 10/nscale)
         h2 = plot([intensities[:,i]; 0], [lengths; lengths[end]], fill = 0, fillcolor = :green, linecolor = :green, xlim = (0, Imax), xticks = nothing,  yflip = true, xlabel = "Intensity")
         h3 = plot(times, intensities[i, :], fill = 0, fillcolor = :blue, linecolor = :blue, ylim = (0, Imax), yticks = nothing, ylabel = "Intensity")
         h4 = heatmap(times, lengths, intensities, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true, colorbar = false)

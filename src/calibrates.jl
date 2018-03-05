@@ -1,4 +1,4 @@
-using ImageFiltering, ImageFeatures, Unitful, Distances
+using ImageFiltering, ImageFeatures, Distances
 
 const h_kernel = Kernel.DoG((5, 180), (5*sqrt(2), 180), (31, 901))
 const α = pi/2 + linspace(-.05, .05, 10)
@@ -21,14 +21,17 @@ A type that holds all the `FilePair`s, including how many there are, `n`.
 """
 struct CalibStage
     timelapse::Vector{DarkFile}
-    Δt::Unitful.Time
-    Δx::Unitful.Length
+    Δt::Float64 # in hours
+    Δx::Float64 # in mm
+    speed::Float64 # in mm/hour
     id::Int
     home::String
     base::String
+
+    CalibStage(timelapse::Vector{DarkFile}, Δt::Float64, Δx::Float64, id::Int, home::String, base::String) = new(timelapse, Δt, Δx, Δx/Δt, id, home, base)
 end
 
-tomillisecond{T}(t::T) = t/convert(T, Dates.Millisecond(1))
+tohour{T}(t::T) = t/convert(T, Dates.Hour(1))
 
 """
 parse2hours(txt)
@@ -37,8 +40,7 @@ Convert `txt` to milliseconds.
 function parse2hours(x::String)
     m = match(r"^(\d\d\d\d)(\d\d)(\d\d) (\d\d):(\d\d):(\d\d).?(\d?\d?\d?)", x)
     @assert m ≠ nothing "Failed to extract date and time from string $x"
-    ms = tomillisecond(DateTime(parse.(Int, m.captures)...) - DateTime(0))
-    ustrip(uconvert(u"hr", 1u"ms"*ms))
+    tohour(DateTime(parse.(Int, m.captures)...) - DateTime(0))
 end
 
 """
@@ -64,10 +66,10 @@ function pixel_width(stages::Vector{Stage})
         file = st.timelapse[1].light
         x = find_vertical_distances(file)
         filter!(i -> 200 < i < 650, x)
-        isempty(x) || return 80u"mm"/6/mean(x) # in mm
+        isempty(x) || return 80/6/mean(x) # in mm
     end
     warning("failed to automatically calibrate the images. Assuming pixels are ~0.04 mm wide, this estimation would correspond to about 350 pixels between two grid lines (please check to make sure this estimation is not too far off)")
-    return 0.03819517804872148u"mm"
+    return 0.03819517804872148
 end
 
 function stages2calib(stages::Vector{Stage})
@@ -80,7 +82,7 @@ function stages2calib(stages::Vector{Stage})
     end
     ts = reshape([parse2hours(x) for x in eachline(`$exiftool -T -ModifyDate -n $files`)], ntl, nst)
     ts .-= RowVector(ts[1,:])
-    Δt = mean(diff(ts, 1), 1)*1u"hr"
+    Δt = mean(diff(ts, 1), 1)
     calibstages = Vector{CalibStage}(nst)
     for j in 1:nst
         dfs = Vector{DarkFile}(ntl)

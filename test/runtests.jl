@@ -1,4 +1,4 @@
-using TrackRoots, Unitful
+using TrackRoots
 using Base.Test
 using DataDeps
 ENV["DATADEPS_ALWAY_ACCEPT"]=true
@@ -26,8 +26,8 @@ endpoints = [[Point(668.2858383593972, 988.693544734596), Point(642.413435311435
     # startpoints = TrackRoots.get_startpoints.(stages)
 
     calibstages = TrackRoots.stages2calib(stages)
-    @test calibstages[1].Δt == 0.24970093565551857u"hr"
-    @test calibstages[1].Δx == 0.03445036016285625u"mm"
+    @test calibstages[1].Δt == 0.24970093565551857
+    @test calibstages[1].Δx == 0.03445036016285625
 
     tracks = TrackRoots.trackroot.(calibstages, startpoints)
     @test tracks[1][1].id == 1

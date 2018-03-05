@@ -1,24 +1,15 @@
 julia 0.6
 
 Cairo 0.4.0 0.4.1
-DataDeps
-Images
-ImageMagick
-ImageFeatures
-Unitful
-Distances
-UnitfulAngles
-OffsetArrays
-StaticArrays
-Distributions
 ImageFiltering
-FileIO
+ImageFeatures
+Distances
+StaticArrays
+Kalman
 Gtk
+Images
 ImageView
-Colors
 GtkReactive
-FixedPointNumbers
 Plots
-GR
 HDF5
 ProgressMeter
