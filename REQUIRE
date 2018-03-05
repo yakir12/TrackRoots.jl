@@ -1,5 +1,6 @@
 julia 0.6
 
+Cairo 0.4.0
 ImageMagick
 ImageFiltering
 ImageFeatures
