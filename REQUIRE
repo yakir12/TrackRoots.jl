@@ -9,5 +9,6 @@ Images
 ImageView
 GtkReactive
 Plots
+GR
 HDF5
 ProgressMeter

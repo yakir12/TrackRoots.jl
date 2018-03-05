@@ -6,7 +6,7 @@ import Base:+
 
 const Image = Matrix{Gray{N0f16}}
 
-const speed = 0.5#0.1719606156256064 # mean downwards speed along the rows of the image in mm per hour
+const speed = 0.4#0.1719606156256064 # mean downwards speed along the rows of the image in mm per hour
 const ρ = (0.8, 0.5) # how much do you trust each speed. This has been calculated from a bunch of datasets
 const Qρ = (0.38629498696108994*(1 - ρ[1]^2), 0.2584574519006643*(1 - ρ[2]^2))
 
