@@ -8,7 +8,7 @@ using ImageFiltering, ImageFeatures, Unitful, Distances
 const h_kernel = Kernel.DoG((5, 180), (5*sqrt(2), 180), (31, 901))
 const α = pi/2 + linspace(-.05, .05, 10)
 
-exiftool_base = joinpath(Pkg.dir("Calibrate"), "deps", "src", "exiftool", "exiftool")
+exiftool_base = joinpath(Pkg.dir("TrackRoots"), "deps", "src", "exiftool", "exiftool")
 const exiftool = exiftool_base*(is_windows() ? ".exe" : "")
 
 """
