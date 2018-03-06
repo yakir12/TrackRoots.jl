@@ -38,6 +38,7 @@ addons:
             - libgtk-3-0
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./test/install_ffmpeg.sh ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install ffmpeg cairo; fi
 script:
     - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
     - if [[ `uname` = "Linux" ]]; then TESTCMD="xvfb-run julia"; else TESTCMD="julia"; fi
