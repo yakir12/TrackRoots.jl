@@ -1,15 +1,24 @@
 # TrackRoots
 This is a `Julia` script for analysing light intensities as a function of time and space in time-lapse image stacks of seedling roots.
 
-| Windows | macOS | Coveralls |
+| Windows | macOS & Linux | Coverage |
 | --- | --- | --- |
 | [![Build status](https://ci.appveyor.com/api/projects/status/ea1xn7716t4xse0i/branch/master?svg=true)](https://ci.appveyor.com/project/yakir12/trackroots-jl/branch/master) | [![Build Status](https://travis-ci.org/yakir12/TrackRoots.jl.svg?branch=master)](https://travis-ci.org/yakir12/TrackRoots.jl) | [![Coverage Status](https://coveralls.io/repos/github/yakir12/TrackRoots.jl/badge.svg?branch=master)](https://coveralls.io/github/yakir12/TrackRoots.jl?branch=master) |
 
 ## How to install
 1. If you haven't already, install the current release of [Julia](https://julialang.org/downloads/) -> you should be able to launch it (some icon on the Desktop or some such).
 2. Start Julia -> a Julia-terminal popped up.
-3. Copy: `Pkg.clone("git://github.com/yakir12/TrackRoots.jl.git"); Pkg.build("TrackRoots")` and paste it in the newly opened Julia-terminal, press Enter -> this may take a long time.
-4. (*not necessary*) To test the package, copy: `Pkg.test("TrackRoots")` and paste it in the Julia-terminal. Press enter to check if all the tests pass -> this may also take a long time.
+3. Copy: 
+   ```julia
+   Pkg.clone("git://github.com/yakir12/TrackRoots.jl.git")
+   Pkg.build("TrackRoots")
+   ```
+   and paste it in the newly opened Julia-terminal, press Enter -> this may take a long time.
+4. (*not necessary*) To test the package, copy: 
+   ```julia
+   Pkg.test("TrackRoots")
+   ```
+   and paste it in the Julia-terminal. Press enter to check if all the tests pass -> this may also take a long time (all tests should pass).
 5. You can close the Julia-terminal after it's done running.
 
 ## Quick start
@@ -60,4 +69,12 @@ The data files includes:
 3. **Times**: the times in hours, corresponds to each column in the intensity matrix.
 4. **Lengths**: the lengths in millimeters, corresponds to each row in the intensity matrix.
 5. **Coordinates**: the `[x y]` coordinates in millimeters of the tip of the root as it moves through time.
+
+## How to update
+To update your local version of `TrackRoots`, copy-paste this in a Julia-terminal: 
+```julia
+Pkg.update()
+``` 
+
+**Note:** After an update, the next time you run `TrackRoots` (almost any Julia script really) will be slower than usual. However, all subsequent runs will be fast.
 
