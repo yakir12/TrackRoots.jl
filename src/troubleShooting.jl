@@ -4,7 +4,17 @@ include(joinpath(Pkg.dir("TrackRoots"), "src", "stages.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "calibrates.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))
 
-ndfile = "/home/yakir/.julia/datadeps/all/5/cle44-luc-bfa3.nd"
+using DataDeps
+ENV["DATADEPS_ALWAY_ACCEPT"]=true
+RegisterDataDep("all",
+                "These are all 8 folders with their `nd` files and multiple dark and light timelapse 16 bit TIF images (7.8 GB total).",
+                "https://s3.eu-central-1.amazonaws.com/yakirgagnon/roots/eight_folders.zip",
+                "c316452c19e3c639737821581d18e45654980e04e0244f3d43e30d47d3e81f11",
+                post_fetch_method=unpack)
+dataset = "5"
+files = readdir(joinpath(datadep"all", dataset))
+i = findfirst(x -> last(splitext(x)) == ".nd", files)
+ndfile = joinpath(datadep"all", dataset, files[i])
 stages = nd2stages(ndfile)
 
 calibstages = stages2calib(stages)
