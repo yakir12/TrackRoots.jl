@@ -3,9 +3,9 @@ using Images, ImageView, GtkReactive
 get_point(p::XY{UserUnit}) = Point(p.y.val, p.x.val)
 
 function adjustimgs(files::Vector{String})
-    imgs = [RGB{Float64}.(load(file)) for file in files]
-    mM = mean(quantile(vec(green.(img)), [.1, .995]) for img in imgs)
-    for img in imgs
+    imgs = [load(file) for file in files]
+    for (i, img) in enumerate(imgs)
+        mM = quantile(vec(img), [.1, .999])
         img .= imadjustintensity(img, mM)
     end
     return imgs

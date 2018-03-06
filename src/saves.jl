@@ -21,7 +21,7 @@ function get_parameters(track::Track, Δx::Float64)
 end
 
 function saveit(calibstages::Vector{CalibStage}, tss::Vector{Vector{Track}})
-    pm = Progress(sum(length(st.timelapse)*length(ts) for (st, ts) in zip(calibstages, tss)), 1, "Saving the gif files")
+    pm = Progress(sum(length(st.timelapse)*length(ts) for (st, ts) in zip(calibstages, tss)), 1, "Saving the results")
     for (st, ts) in zip(calibstages, tss)
         saveit(st, ts, pm)
     end

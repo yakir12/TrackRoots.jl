@@ -55,6 +55,8 @@ These files are saved in the same directory the `.nd` file is in.
 
 ### 1. Video
 The video file shows:
+![video frame](./docs/video.png)
+
 1. An image of the progression of the root and its track (`x` and `y` axis are in mm).
 2. A heat-map describing the intensity of the root tip as a function of time in hours and root length in mm (i.e. the distance along the root between the starting location of the tip and its current location).
 3. A plot of the intensity as a function of root length in mm.
