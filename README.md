@@ -10,7 +10,7 @@ This is a `Julia` script for analysing light intensities as a function of time a
 2. Start Julia -> a Julia-terminal popped up.
 3. Copy: 
    ```julia
-   Pkg.clone("git://github.com/yakir12/TrackRoots.jl.git")
+   Pkg.clone("https://github.com/yakir12/TrackRoots.jl")
    Pkg.build("TrackRoots")
    ```
    and paste it in the newly opened Julia-terminal, press Enter -> this may take a long time.
