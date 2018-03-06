@@ -85,6 +85,8 @@ function save2gif(home::String, base::String, stage_number::Int, root_number::In
         Plots.frame(anim)
         next!(pm)
     end
-    filename = "$(base)_stage_$(stage_number)_root_$(root_number)_summary.mp4"
-    mp4(anim, joinpath(home, filename), fps = round(Int, n/5))
+    filename = tempname()*".mp4"
+    mp4(anim, filename, fps = round(Int, n/5))
+    # filename = "$(base)_stage_$(stage_number)_root_$(root_number)_summary.mp4"
+    # mp4(anim, joinpath(home, filename), fps = round(Int, n/5))
 end
