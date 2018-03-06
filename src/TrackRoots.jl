@@ -1,6 +1,10 @@
 # __precompile__()
 module TrackRoots
 
+using Plots
+gr()
+default(show=false)
+
 export main
 
 using Gtk
@@ -16,6 +20,10 @@ function main(ndfile::String = open_dialog("Pick an `.nd` file", GtkNullContaine
     stages = nd2stages(ndfile)
     startpoints = get_startpoints.(stages)
     info("Aquired the `.nd` file and the starting points of the root-tips. Calibrating the data…")
+    main(stages, startpoints)
+end
+
+function main(stages::Vector{Stage}, startpoints::Vector{Vector{Point}})
     calibstages = stages2calib(stages)
     info("Calibrated the data. Tracking the roots…")
     tracks = trackroot.(calibstages, startpoints)
@@ -24,13 +32,6 @@ function main(ndfile::String = open_dialog("Pick an `.nd` file", GtkNullContaine
     info("Done!")
 end
 
-function main(ndfile::String, startpoints::Vector{Vector{Point}})
-    calibstages = stages2calib(nd2stages(ndfile))
-    info("Calibrated the data. Tracking the roots…")
-    tracks = trackroot.(calibstages, startpoints)
-    info("Tracked the roots. Saving the results…")
-    saveit(calibstages, tracks)
-    info("Done!")
-end
+main(ndfile::String, startpoints::Vector{Vector{Point}}) = main(nd2stages(ndfile), startpoints)
 
 end # module

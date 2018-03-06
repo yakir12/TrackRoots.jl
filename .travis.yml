@@ -6,17 +6,17 @@ os:
   - osx
 julia:
   - 0.6
-  - nightly
+    # - nightly
 notifications:
   email: false
 git:
   depth: 99999999
 
-# uncomment the following lines to allow failures on nightly julia
-# (tests will run but not make your overall status red)
-matrix:
- allow_failures:
- - julia: nightly
+## uncomment the following lines to allow failures on nightly julia
+## (tests will run but not make your overall status red)
+#matrix:
+# allow_failures:
+# - julia: nightly
 
 ## uncomment and modify the following lines to manually install system packages
 #addons:
@@ -30,21 +30,22 @@ matrix:
 #script:
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("TrackRoots"); Pkg.test("TrackRoots"; coverage=true)'
 #
-addons:
-    apt:
-        packages:
-            - xvfb
-            - xauth
-            - libgtk-3-0
+# addons:
+# apt:
+# packages:
+# - xvfb
+# - xauth
+# - libgtk-3-0
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./test/install_ffmpeg.sh ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install ffmpeg cairo; fi
 script:
-    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-    - if [[ `uname` = "Linux" ]]; then TESTCMD="xvfb-run julia"; else TESTCMD="julia"; fi
-    - $TESTCMD -e 'Pkg.clone(pwd());
-        Pkg.build("TrackRoots");
-        Pkg.test("TrackRoots"; coverage=true)'
+    - julia -e 'Pkg.clone(pwd()); Pkg.build("TrackRoots"); Pkg.test("TrackRoots"; coverage=true)'
+      # - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+      # - if [[ `uname` = "Linux" ]]; then TESTCMD="xvfb-run julia"; else TESTCMD="julia"; fi
+      # - $TESTCMD -e 'Pkg.clone(pwd());
+      # Pkg.build("TrackRoots");
+      # Pkg.test("TrackRoots"; coverage=true)'
 after_success:
   # push coverage results to Coveralls
   - julia -e 'cd(Pkg.dir("TrackRoots")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'

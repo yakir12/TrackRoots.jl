@@ -1,10 +1,10 @@
-using Plots, HDF5, ProgressMeter
+using HDF5, ProgressMeter # , Plots
+# gr()
+# default(show=false)
 
 const nscale = 2
 const sz2 = round(Int, sz/nscale)
 const sz3 = round(Int, 2sz2)
-gr()
-default(show=false)
 # default(size=(256,256)) #Plot canvas size
 # default(dpi=50/3) #Only for PyPlot - presently broken
 
@@ -85,8 +85,8 @@ function save2gif(home::String, base::String, stage_number::Int, root_number::In
         Plots.frame(anim)
         next!(pm)
     end
-    filename = tempname()*".mp4"
-    mp4(anim, filename, fps = round(Int, n/5))
-    # filename = "$(base)_stage_$(stage_number)_root_$(root_number)_summary.mp4"
-    # mp4(anim, joinpath(home, filename), fps = round(Int, n/5))
+    # filename = tempname()*".mp4"
+    # mp4(anim, filename, fps = round(Int, n/5))
+    filename = "$(base)_stage_$(stage_number)_root_$(root_number)_summary.mp4"
+    mp4(anim, joinpath(home, filename), fps = round(Int, n/5))
 end
