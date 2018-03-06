@@ -23,12 +23,18 @@ end
 function initiatemodel(vrow::Float64)
     p0 = SVector(NaN, NaN, vrow, 0.0)
     P0 = 10*@SMatrix eye(4)
+    # A = SMatrix{4, 4, Float64}([1 0 1 0
+                                # 0 1 0 1
+                                # 0 0 ρ[1] 0
+                                # 0 0 0 ρ[2]])
     A = SMatrix{4, 4, Float64}([1 0 1 0
                                 0 1 0 1
-                                0 0 ρ[1] 0
-                                0 0 0 ρ[2]])
-    b = SVector(0, 0, (1-ρ[1])*vrow, (1-ρ[2])*0)
-    Q = 1*SMatrix{4,4, Float64}(diagm([1, 1, Qρ...]))
+                                0 0 1 0
+                                0 0 0 1])
+    # b = SVector(0, 0, (1-ρ[1])*vrow, (1-ρ[2])*0)
+    b = SVector(0., 0, 0, 0)
+    # Q = 1*SMatrix{4,4, Float64}(diagm([1, 1, Qρ...]))
+    Q = 1*SMatrix{4,4, Float64}(diagm([1, 1, 5, 5]))
     y = SVector(NaN, NaN)
     C = @SMatrix eye(2, 4)
     R = 2*@SMatrix eye(2)

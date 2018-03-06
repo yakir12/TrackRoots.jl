@@ -15,9 +15,15 @@ dataset = "5"
 files = readdir(joinpath(datadep"all", dataset))
 i = findfirst(x -> last(splitext(x)) == ".nd", files)
 ndfile = joinpath(datadep"all", dataset, files[i])
-stages = nd2stages(ndfile)
+startpointss = [[Point(761.592, 414.589)]]
+
+using TrackRoots
+main(ndfile, startpointss)
+
+#=stages = nd2stages(ndfile)
 
 calibstages = stages2calib(stages)
+
 startpointss = [[Point(761.592, 414.589)]]
 st = calibstages[1]
 startpoints = startpointss[1]
@@ -41,4 +47,4 @@ for i in 2:20
     ImageView.annotate!(g, AnnotationPoint(x[2], x[1], shape='.', size=2, color=RGB(1,0,1)))
     r.x = x
     r.P = P
-end
+end=#

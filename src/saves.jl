@@ -2,7 +2,7 @@ using HDF5, ProgressMeter, Plots
 gr()
 default(show=false)
 
-const nscale = 2
+const nscale = 4
 const sz2 = round(Int, sz/nscale)
 const sz3 = round(Int, 2sz2)
 
@@ -10,8 +10,8 @@ function get_parameters(track::Track, Δx::Float64)
     x = last.(track.coordinates)
     y = first.(track.coordinates)
     n = length(track.lengths)
-    intensities = zeros(n, n)
     m = minimum(minimum(i) for i in track.intensities)
+    intensities = zeros(n, n)
     for i in 1:n, j in 1:i
         intensities[j,i] = track.intensities[i][j] - m
     end
@@ -38,7 +38,7 @@ function saveit(st::CalibStage, rs::Vector{Track}, pm::Progress = Progress(1))
     for r in rs
         x, y, n, intensities, lengths, times = get_parameters(r, st.Δx)
         save2hdf5(st.home, st.base, st.id, r.id, x, y, intensities, lengths, times)
-        save2gif(st.home, st.base, st.id, r.id, x/nscale, y/nscale, n, intensities, lengths, times, formatlabel, imgs, pm)
+        save2gif(st.home, st.base, st.id, r.id, x/nscale, y/nscale, n, intensities, lengths, times, formatlabel, imgs, st.Δt, pm)
     end
 end
 
@@ -66,12 +66,13 @@ function save2hdf5(home::String, base::String, stage_number::Int, root_number::I
     end
 end
 
-function save2gif(home::String, base::String, stage_number::Int, root_number::Int, x, y, n::Int, intensities, lengths, times, formatlabel::Function, imgs, pm::Progress)
-    Imax = maximum(intensities)
+function save2gif(home::String, base::String, stage_number::Int, root_number::Int, x, y, n::Int, intensities, lengths, times, formatlabel::Function, imgs, Δt::Float64, pm::Progress)
+    Imax = quantile(vec(intensities), 0.98)
+    intensities .= min.(intensities, Imax)
     anim = Animation()
     for i in 1:n
         h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
-        plot!(x[1:i], y[1:i], color = :red, linewidth = 10/nscale)
+        plot!(x[1:i], y[1:i], color = :red)
         h2 = plot([intensities[:,i]; 0], [lengths; lengths[end]], fill = 0, fillcolor = :green, linecolor = :green, xlim = (0, Imax), xticks = nothing,  yflip = true, xlabel = "Intensity")
         h3 = plot(times, intensities[i, :], fill = 0, fillcolor = :blue, linecolor = :blue, ylim = (0, Imax), yticks = nothing, ylabel = "Intensity")
         h4 = heatmap(times, lengths, intensities, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true, colorbar = false)
@@ -82,5 +83,5 @@ function save2gif(home::String, base::String, stage_number::Int, root_number::In
         next!(pm)
     end
     filename = "$(base)_stage_$(stage_number)_root_$(root_number)_summary.mp4"
-    mp4(anim, joinpath(home, filename), fps = round(Int, n/5))
+    mp4(anim, joinpath(home, filename), fps = round(Int, 1/(5/180000*60*60*Δt)))
 end
