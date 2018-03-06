@@ -70,7 +70,7 @@ end
 
 function save2gif(home::String, base::String, stage_number::Int, root_number::Int, x, y, n::Int, intensities, lengths, times, formatlabel::Function, imgs, pm::Progress)
     Imax = maximum(intensities)
-    # anim = Animation()
+    anim = Animation()
     for i in 1:n
         #=h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
         plot!(x[1:i], y[1:i], color = :red, linewidth = 10/nscale)
@@ -81,8 +81,10 @@ function save2gif(home::String, base::String, stage_number::Int, root_number::In
         plot!([times[i], times[i]], lengths[[1, end]], color = :green)
         plot(h3, h1, h4, h2, legend = false, size=(sz3, sz3), dpi=50/3)
         Plots.frame(anim)=#
+        plot(rand(5))
+        Plots.frame(anim)
         next!(pm)
     end
     filename = "$(base)_stage_$(stage_number)_root_$(root_number)_summary.mp4"
-    # mp4(anim, joinpath(home, filename), fps = round(Int, n/5))
+    mp4(anim, joinpath(home, filename), fps = round(Int, n/5))
 end
