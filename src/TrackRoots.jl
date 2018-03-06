@@ -11,7 +11,7 @@ export main
 
 include(joinpath(Pkg.dir("TrackRoots"), "src", "utils.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "stages.jl"))
-include(joinpath(Pkg.dir("TrackRoots"), "src", "startPoints.jl"))
+# include(joinpath(Pkg.dir("TrackRoots"), "src", "startPoints.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "calibrates.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "saves.jl"))
