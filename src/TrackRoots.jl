@@ -4,6 +4,7 @@ module TrackRoots
 using Plots
 gr()
 default(show=false)
+using Images#, ImageView, GtkReactive
 
 export main
 
