@@ -7,7 +7,7 @@ default(show=false)
 
 export main
 
-using Gtk
+# using Gtk
 
 include(joinpath(Pkg.dir("TrackRoots"), "src", "utils.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "stages.jl"))

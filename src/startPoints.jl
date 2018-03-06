@@ -1,4 +1,4 @@
-using Images, ImageView, GtkReactive
+using Images#, ImageView, GtkReactive
 
 get_point(p::XY{UserUnit}) = Point(p.y.val, p.x.val)
 
