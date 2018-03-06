@@ -1,12 +1,10 @@
-using HDF5, ProgressMeter # , Plots
-# gr()
-# default(show=false)
+using HDF5, ProgressMeter, Plots
+gr()
+default(show=false)
 
 const nscale = 2
 const sz2 = round(Int, sz/nscale)
 const sz3 = round(Int, 2sz2)
-# default(size=(256,256)) #Plot canvas size
-# default(dpi=50/3) #Only for PyPlot - presently broken
 
 function get_parameters(track::Track, Δx::Float64)
     x = last.(track.coordinates)
@@ -72,7 +70,7 @@ function save2gif(home::String, base::String, stage_number::Int, root_number::In
     Imax = maximum(intensities)
     anim = Animation()
     for i in 1:n
-        #=h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
+        h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
         plot!(x[1:i], y[1:i], color = :red, linewidth = 10/nscale)
         h2 = plot([intensities[:,i]; 0], [lengths; lengths[end]], fill = 0, fillcolor = :green, linecolor = :green, xlim = (0, Imax), xticks = nothing,  yflip = true, xlabel = "Intensity")
         h3 = plot(times, intensities[i, :], fill = 0, fillcolor = :blue, linecolor = :blue, ylim = (0, Imax), yticks = nothing, ylabel = "Intensity")
@@ -80,13 +78,9 @@ function save2gif(home::String, base::String, stage_number::Int, root_number::In
         plot!(times[[1, end]], [lengths[i], lengths[i]], color = :blue)
         plot!([times[i], times[i]], lengths[[1, end]], color = :green)
         plot(h3, h1, h4, h2, legend = false, size=(sz3, sz3), dpi=50/3)
-        Plots.frame(anim)=#
-        plot(rand(5))
         Plots.frame(anim)
         next!(pm)
     end
-    # filename = tempname()*".mp4"
-    # mp4(anim, filename, fps = round(Int, n/5))
     filename = "$(base)_stage_$(stage_number)_root_$(root_number)_summary.mp4"
     mp4(anim, joinpath(home, filename), fps = round(Int, n/5))
 end
