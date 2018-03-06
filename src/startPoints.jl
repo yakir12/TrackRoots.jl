@@ -2,16 +2,18 @@ using Images, ImageView, GtkReactive
 
 get_point(p::XY{UserUnit}) = Point(p.y.val, p.x.val)
 
-function adjustimg(file::String)
-    img = Float64.(load(file))
-    mM = quantile(vec(img), [.1, .995])
-    img .= imadjustintensity(img, mM)
+function adjustimgs(files::Vector{String})
+    imgs = [RGB{Float64}.(load(file)) for file in files]
+    mM = mean(quantile(vec(green.(img)), [.1, .995]) for img in imgs)
+    for img in imgs
+        img .= imadjustintensity(img, mM)
+    end
+    return imgs
 end
 
 function get_startpoints(f1::String, fn::String)
-    img1 = adjustimg(f1)
-    imgn = adjustimg(fn)
-    imgc = colorview(RGB, imgn, img1, imgn)
+    imgs = adjustimgs([f1, fn])
+    imgc = colorview(RGB, imgs..., imgs[1])
     const g = imshow(imgc, name="Shift-click to add tip, Shift-ctrl-click to remove tip, close window when done")
     const c = g["gui"]["canvas"]
     const add = Signal(XY{UserUnit}(1,1)) 
