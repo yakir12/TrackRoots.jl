@@ -35,3 +35,12 @@ end
         @test endpoints[i] == endpoint
     end
 end
+
+@testset "plotting" begin
+    startpoint = [Point[[774.3011654713115, 911.7642161885246]]]
+    ndfile = joinpath(datadep"test", "1", "d2.nd")
+    main(ndfile, startpoint)
+    @test isfile(joinpath(datadep"test", "1", "d2_stage_1_root_1_intensities.png"))
+    @test isfile(joinpath(datadep"test", "1", "d2_stage_1_root_1_root.gif"))
+    @test isfile(joinpath(datadep"test", "1", "d2_stage_1_root_1_summary.h5"))
+end
