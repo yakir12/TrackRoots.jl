@@ -3,11 +3,13 @@ using Images, ImageView, GtkReactive
 get_point(p::XY{UserUnit}) = Point(p.y.val, p.x.val)
 
 function adjustimgs(files::Vector{String})
-    imgs = [load(file) for file in files]
+    imgs = [Float64.(load(file)) for file in files]
     for (i, img) in enumerate(imgs)
         mM = quantile(vec(img), [.1, .999])
         img .= imadjustintensity(img, mM)
     end
+    imgs[2] .-= imgs[1]
+    imgs[2] .= max.(imgs[2], 0)
     return imgs
 end
 
