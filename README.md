@@ -1,7 +1,7 @@
 # TrackRoots
 This is a `Julia` script for analysing light intensities as a function of time and space in time-lapse image stacks of seedling roots.
 
-| Windows | macOS & Linux | Coverage |
+| Windows | macOS | Coverage |
 | --- | --- | --- |
 | [![Build status](https://ci.appveyor.com/api/projects/status/ea1xn7716t4xse0i/branch/master?svg=true)](https://ci.appveyor.com/project/yakir12/trackroots-jl/branch/master) | [![Build Status](https://travis-ci.org/yakir12/TrackRoots.jl.svg?branch=master)](https://travis-ci.org/yakir12/TrackRoots.jl) | [![Coverage Status](https://coveralls.io/repos/github/yakir12/TrackRoots.jl/badge.svg?branch=master)](https://coveralls.io/github/yakir12/TrackRoots.jl?branch=master) |
 
