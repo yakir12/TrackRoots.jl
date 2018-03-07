@@ -1,4 +1,6 @@
-__precompile__()
+# __precompile__()
+ENV["PLOTS_TEST"] = "true"
+ENV["GKSwstype"] = "100"
 module TrackRoots
 
 export main
