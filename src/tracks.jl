@@ -7,8 +7,10 @@ import Base:+
 const Image = Matrix{Gray{N0f16}}
 
 const speed = 0.1719606156256064 # mean downwards speed along the rows of the image in mm per hour
-const ρ = (0.8, 0.5) # how much do you trust each speed. This has been calculated from a bunch of datasets
-const Qρ = (0.38629498696108994*(1 - ρ[1]^2), 0.2584574519006643*(1 - ρ[2]^2))
+# const ρ = (0.8, 0.5) # how much do you trust each speed. This has been calculated from a bunch of datasets
+# const ρ = 0.8 # how much do you trust each speed. This has been calculated from a bunch of datasets
+# const Qρ = (0.38629498696108994*(1 - ρ[1]^2), 0.2584574519006643*(1 - ρ[2]^2))
+# const Qρ = 0.32*(1 - ρ^2)
 
 const weight_disk = disk(weight_radius)
 const intensity_disk = disk(intensity_radius)
@@ -24,16 +26,16 @@ function initiatemodel(vrow::Float64)
     p0 = SVector(NaN, NaN, vrow, 0.0)
     P0 = 10*@SMatrix eye(4)
     # A = SMatrix{4, 4, Float64}([1 0 1 0
-                                # 0 1 0 1
-                                # 0 0 ρ[1] 0
-                                # 0 0 0 ρ[2]])
+    #                             0 1 0 1
+    #                             0 0 ρ 0
+    #                             0 0 0 ρ])
     A = SMatrix{4, 4, Float64}([1 0 1 0
                                 0 1 0 1
                                 0 0 1 0
                                 0 0 0 1])
-    # b = SVector(0, 0, (1-ρ[1])*vrow, (1-ρ[2])*0)
+    # b = SVector(0, 0, (1-ρ)*vrow, 0)
     b = SVector(0., 0, 0, 0)
-    # Q = 1*SMatrix{4,4, Float64}(diagm([1, 1, Qρ...]))
+    # Q = 1*SMatrix{4,4, Float64}(diagm([1, 1, Qρ, Qρ]))
     Q = 1*SMatrix{4,4, Float64}(diagm([1, 1, 5, 5]))
     y = SVector(NaN, NaN)
     C = @SMatrix eye(2, 4)
