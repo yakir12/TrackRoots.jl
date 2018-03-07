@@ -5,11 +5,12 @@ using Base.Test
 
 using DataDeps
 ENV["DATADEPS_ALWAY_ACCEPT"]=true
-RegisterDataDep("all",
-                "These are all 8 folders with their `nd` files and multiple dark and light timelapse 16 bit TIF images (7.8 GB total).",
-                "https://s3.eu-central-1.amazonaws.com/yakirgagnon/roots/eight_folders.zip",
-                "c316452c19e3c639737821581d18e45654980e04e0244f3d43e30d47d3e81f11",
+RegisterDataDep("test",
+                "These are some folders with their `nd` files and multiple dark and light timelapse 16 bit TIF images (2.9 GB total).",
+                "https://s3.eu-central-1.amazonaws.com/yakirgagnon/roots/test.zip",
+                "84453b6d4e84ad1244210d6bffcfd5916c15097f790925888148db90c3d148a7",
                 post_fetch_method=unpack)
+
 import TrackRoots:Point
 @testset "utils" begin
 
@@ -23,9 +24,9 @@ endpoints = [[Point[[904.9364522125379, 919.0443242002601]]], [Point[[759.733958
 
 @testset "all" begin
     for dataset in [1,5,6,7]
-        files = readdir(joinpath(datadep"all", string(dataset)))
+        files = readdir(joinpath(datadep"test", string(dataset)))
         i = findfirst(x -> last(splitext(x)) == ".nd", files)
-        ndfile = joinpath(datadep"all", string(dataset), files[i])
+        ndfile = joinpath(datadep"test", string(dataset), files[i])
         stages = TrackRoots.nd2stages(ndfile)
         calibstages = TrackRoots.stages2calib(stages)
         tracks = TrackRoots.trackroot.(calibstages, startpoints[dataset])
