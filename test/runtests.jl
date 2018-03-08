@@ -1,7 +1,7 @@
 ENV["PLOTS_TEST"] = "true"
 ENV["GKSwstype"] = "100"
 using TrackRoots
-import TrackRoots:Point
+import TrackRoots:Mark
 using Base.Test
 
 using DataDeps
@@ -18,8 +18,8 @@ RegisterDataDep("test",
 end
 
 @testset "all" begin
-    startpoints = [[Point[[774.3011654713115, 911.7642161885246]]], [Point[[761.334080430328, 413.93003970286884]], Point[[811.9541095671107, 510.3906089907787]]]]
-    endpoints = [[Point[[904.9364522125379, 919.0443242002601]]], [Point[[1017.0597835688507, 208.98726714885305]], Point[[1017.5227104153928, 315.23929042231043]]]]
+    startpoints = [[Mark[[774.3011654713115, 911.7642161885246]]], [Mark[[761.334080430328, 413.93003970286884]], Mark[[811.9541095671107, 510.3906089907787]]]]
+    endpoints = [[Mark[[904.9364522125379, 919.0443242002601]]], [Mark[[1017.0597835688507, 208.98726714885305]], Mark[[1017.5227104153928, 315.23929042231043]]]]
     for (i, dataset) in enumerate(["1","5"])
         files = readdir(joinpath(datadep"test", dataset))
         ind = findfirst(x -> last(splitext(x)) == ".nd", files)
@@ -37,10 +37,10 @@ end
 end
 
 @testset "plotting" begin
-    startpoint = [Point[[774.3011654713115, 911.7642161885246]]]
+    startpoint = [Mark[[774.3011654713115, 911.7642161885246]]]
     ndfile = joinpath(datadep"test", "1", "d2.nd")
     main(ndfile, startpoint)
-    @test isfile(joinpath(datadep"test", "1", "d2_stage_1_root_1_intensities.png"))
-    @test isfile(joinpath(datadep"test", "1", "d2_stage_1_root_1_root.gif"))
-    @test isfile(joinpath(datadep"test", "1", "d2_stage_1_root_1_summary.h5"))
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "intensities.png"))
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "root.gif"))
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "intensities.csv"))
 end

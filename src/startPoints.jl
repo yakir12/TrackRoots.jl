@@ -1,6 +1,6 @@
 using Images, ImageView, GtkReactive
 
-get_point(p::XY{UserUnit}) = Point(p.y.val, p.x.val)
+get_point(p::XY{UserUnit}) = Mark(p.y.val, p.x.val)
 
 function adjustimgs(files::Vector{String})
     imgs = [Float64.(load(file)) for file in files]

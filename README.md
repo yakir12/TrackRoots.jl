@@ -46,14 +46,17 @@ alt="TrackRoots tutorial video" width="400" height="400" border="10" /></a>
 
    To help you identify what constitutes a root-tip, watch [this video](https://vimeo.com/258952278) show-casing the process for 21 root-tips.
 3. Close the window when you're done selecting root tips. This process will repeat for all the stages in that dataset. To skip a stage simply close the window without selecting any root tips.
-4. Once you've finished selecting root tips in all of the stages, the program will automatically calibrate all the images, track all the roots, and save the results into `hdf5` files and `mp4` files (notifying you of its progress in each step). 
+4. Once you've finished selecting root tips in all of the stages, the program will automatically calibrate all the images, track all the roots, and save the results into `csv` files and `gif` files (notifying you of its progress in each step). 
 5. You can close the Julia-terminal after it's done running (or keep it open to save time in the next run).
 
 ## Results
-Each root in each stage will result in two files: 
-1. `.mp4` video file summarizing the root.
-2. `.h5` data file ([`hdf5` format](https://en.wikipedia.org/wiki/Hierarchical_Data_Format#HDF5)) containing all the data.
-These files are saved in the same directory the `.nd` file is in.
+Each root in each stage will result in 4 files: 
+1. `coordinates.csv`: a comma separated file with the `[x, y]` coordinates of the root (in mm).
+2. `intensities.csv`: a comma separated file with the lengths in mm, times in hours, and intensities. The first column is the root lengths (i.e. the distance along the root between the starting location of the tip and its current location), the second column is the intensities at time 0 hours, the third column is the intensities at the next period, etc. 
+3. `intensities.png`: a heat-map plot of the intensities as a function of time in hours (x-axis) and root length in mm (y-axis).
+4. `root.gif`: showing the tracked root as a time-lapse gif of the track in red.
+
+These files are saved in the same directory the `.nd` file is in and organized into one folder per stage, and one folder per root per stage.
 
 ### 1. Video
 The video file shows:
@@ -66,14 +69,6 @@ The video file shows:
 
 as the video plays, these change as a function of time.
 
-### 2. Data
-The data files includes:
-1. **Information**: the path to the `.nd` file, the stage number, and the root number.
-2. **Intensities**: the intensities in relative units. Each row is a single root length, growing from the top to the bottom. Each column is a single point in time, progressing from the top to bottom.
-3. **Times**: the times in hours, corresponds to each column in the intensity matrix.
-4. **Lengths**: the lengths in millimeters, corresponds to each row in the intensity matrix.
-5. **Coordinates**: the `[x y]` coordinates in millimeters of the tip of the root as it moves through time.
-
 ## How to update
 To update your local version of `TrackRoots`, copy-paste this in a Julia-terminal: 
 ```julia
@@ -83,4 +78,4 @@ Pkg.update()
 **Note:** After an update, the next time you run `TrackRoots` (almost any Julia script really) will be slower than usual. However, all subsequent runs will be fast.
 
 ## How does it all work?
-The structure of the `.nd` file is translated into a type system for efficient and secure handling of the data. This procedure should be able to handle any combination of stages/wavelengths. The root-tip points are selected via a `Gtk` library. The spatial calibration works by automatically detecting the grid-lines in the bright images using a Hough transform. The limitation of this process is that at least two clear unobstructed grid-lines should be visible in one of the bright images. The temporal calibration works by extracting the original modification/creation times of the image files using `exiftools`. The advantage of this method is that you can safely run it on copied images (i.e. not the original files) and it will still work. Tracking the roots works via a Kalman filter which auto corrects its estimates from image-feedback. This leads to a robust and accurate root trajectory. Finally, saving the results is done by creating an informative video and a data file in a backwards-compatible format (`hdf5`).
+The structure of the `.nd` file is translated into a type system for efficient and secure handling of the data. This procedure should be able to handle any combination of stages/wavelengths. The root-tip points are selected via a `Gtk` library. The spatial calibration works by automatically detecting the grid-lines in the bright images using a Hough transform. The limitation of this process is that at least two clear unobstructed grid-lines should be visible in one of the bright images. The temporal calibration works by extracting the original modification/creation times of the image files using `exiftools`. The advantage of this method is that you can safely run it on copied images (i.e. not the original files) and it will still work. Tracking the roots works via a Kalman filter which auto corrects its estimates from image-feedback. This leads to a robust and accurate root trajectory. Finally, saving the results is done by creating an informative gif and data files.

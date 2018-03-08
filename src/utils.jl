@@ -1,6 +1,6 @@
 using StaticArrays
 
-const Point = SVector{2, Float64}
+const Mark = SVector{2, Float64}
 
 disk(r::Int) = [CartesianIndex(y,x) for y in -r:r for x in -r:r if sqrt(y^2 + x^2) ≤ r]
 

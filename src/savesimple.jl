@@ -22,6 +22,7 @@ end
 
 function saveit(calibstages::Vector{CalibStage}, tss::Vector{Vector{Track}})
     pm = Progress(sum(length(st.timelapse)*length(ts) for (st, ts) in zip(calibstages, tss)), 1, "Saving the results")
+    mkpath(joinpath(calibstages[1].home, calibstages[1].base))
     for (st, ts) in zip(calibstages, tss)
         saveit(st, ts, pm)
     end
@@ -34,50 +35,33 @@ function saveit(st::CalibStage, rs::Vector{Track}, pm::Progress)
     for img in imgs
         img .= imadjustintensity(img, mM)
     end
+    mkpath(joinpath(st.home, st.base, "stage $(st.id)"))
     for r in rs
         x, y, n, intensities, lengths, times = get_parameters(r, st.Δx)
-        save2hdf5(st.home, st.base, st.id, r.id, x, y, intensities, lengths, times)
-        save2gif(st.home, st.base, st.id, r.id, x/nscale, y/nscale, n, intensities, lengths, times, imgs, st.Δt, pm)
+        path = joinpath(st.home, st.base, "stage $(st.id)", "root $(r.id)")
+        mkpath(path)
+        save2csv(path, x, y, intensities, lengths, times)
+        save2gif(path, x/nscale, y/nscale, n, intensities, lengths, times, imgs, st.Δt, pm)
     end
 end
 
-function save2hdf5(home::String, base::String, stage_number::Int, root_number::Int, x, y, intensities, lengths, times)
-    h5open(joinpath(home, "$(base)_stage_$(stage_number)_root_$(root_number)_summary.h5"), "w") do file
-        gmain = g_create(file, "home")
-        ginfo = g_create(gmain, "information")
-        ginfo["base"] = base
-        ginfo["home"] = home
-        ginfo["stage"] = stage_number
-        ginfo["root"] = root_number
-        attrs(ginfo)["Description"] = "Background information about this root"
-        gt = g_create(gmain, "times")
-        gt["data"] = times
-        attrs(gt)["Description"] = "The times in hours, corresponds to each column in the intensity matrix"
-        gl = g_create(gmain, "lengths")
-        gl["data"] = lengths
-        attrs(gl)["Description"] = "The lengths in millimeters, corresponds to each row in the intensity matrix"
-        gi = g_create(gmain, "intensities")
-        gi["data"] = intensities
-        attrs(gi)["Description"] = "The intensities in relative units. Each row is a single root length, growing from the top to the bottom. Each column is a single point in time, progressing from the top to bottom"
-        gxy = g_create(gmain, "coordinates")
-        gxy["data"] = [x y]
-        attrs(gxy)["Description"] = "The [x y] coordinates in millimeters of the tip of the root as it moves through time."
-    end
+function save2csv(path::String, x, y, intensities, lengths, times)
+    z = [[nothing; lengths] [RowVector(times); intensities]]
+    writecsv(joinpath(path, "intensities.csv"), z)
+    writecsv(joinpath(path, "coordinates.csv"), zip(x, y))
 end
 
-function save2gif(home::String, base::String, stage_number::Int, root_number::Int, x, y, n::Int, intensities, lengths, times, imgs, Δt::Float64, pm::Progress)
+function save2gif(path::String, x, y, n::Int, intensities, lengths, times, imgs, Δt::Float64, pm::Progress)
     _imgs = deepcopy(imgs)
     p = [(round(Int, xi), round(Int, yi)) for (xi, yi) in zip(x, y)]
     for i in 1:n
         draw!(_imgs[i], Path(p[1:i]), RGB{N0f16}(1,0,0))
         next!(pm)
     end
-    filename = "$(base)_stage_$(stage_number)_root_$(root_number)_root.gif"
-    save(joinpath(home, filename), cat(3, _imgs...), fps = round(Int, 1/(5/180000*60*60*Δt)))
+    save(joinpath(path, "root.gif"), cat(3, _imgs...), fps = round(Int, 1/(5/180000*60*60*Δt)))
     Imax = quantile(vec(intensities), 0.98)
     intensities .= min.(intensities, Imax)
     heatmap(times, lengths, intensities, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true, colorbar = false)
-    filename = "$(base)_stage_$(stage_number)_root_$(root_number)_intensities"
-    png(joinpath(home, filename))
+    png(joinpath(path, "intensities.png"))
 end
 

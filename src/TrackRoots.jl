@@ -21,7 +21,7 @@ function main(ndfile::String = open_dialog("Pick an `.nd` file", GtkNullContaine
     main(stages, startpoints)
 end
 
-function main(stages::Vector{Stage}, startpoints::Vector{Vector{Point}})
+function main(stages::Vector{Stage}, startpoints::Vector{Vector{Mark}})
     calibstages = stages2calib(stages)
     info("Calibrated the data. Tracking the roots…")
     tracks = trackroot.(calibstages, startpoints)
@@ -30,6 +30,6 @@ function main(stages::Vector{Stage}, startpoints::Vector{Vector{Point}})
     info("Done!")
 end
 
-main(ndfile::String, startpoints::Vector{Vector{Point}}) = main(nd2stages(ndfile), startpoints)
+main(ndfile::String, startpoints::Vector{Vector{Mark}}) = main(nd2stages(ndfile), startpoints)
 
 end # module
