@@ -14,17 +14,17 @@ function get_startpoints(f1::String, fn::String)
     const g = imshow(imgc, name="Shift-click to add tip, Shift-ctrl-click to remove tip, close window when done")
     const c = g["gui"]["canvas"]
     const zr = g["roi"]["zoomregion"]
-    s1 = slider(linspace(0,1,2^16), value=ms1[2])
-    s2 = slider(linspace(0,1,2^16), value=ms2[2])
+    s1 = slider(linspace(0,1,2^16), value=1 - ms1[2])
+    s2 = slider(linspace(0,1,2^16), value=1 - ms2[2])
     b1 = GtkBox(:h)
     b2 = GtkBox(:h)
-    push!(b1, label("First frame:"), s1)
+    push!(b1, label("First frame (magenta):"), s1)
     setproperty!(b1,:expand,widget(s1),true)
-    push!(b2, label("Last frame:"), s2)
+    push!(b2, label("Last frame (green):"), s2)
     setproperty!(b2,:expand,widget(s2),true)
     foreach(s1, s2) do M1, M2
-        img1tmp .= imadjustintensity(img1, (m[1], M1))
-        img2tmp .= imadjustintensity(img2, (m[2], M2))
+        img1tmp .= imadjustintensity(img1, (m[1], 1 - M1))
+        img2tmp .= imadjustintensity(img2, (m[2], 1 - M2))
         push!(zr, value(zr).currentview)
     end
     push!(g["gui"]["vbox"], b1, b2)

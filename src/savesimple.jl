@@ -102,8 +102,8 @@ function save2gif(path::String, x, y, n::Int, intensities, lengths, times, forma
     for i in 1:n
         h1 = heatmap(imgs2[i], aspect_ratio = 1, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, xticks=[])
         plot!(x[1:i]-xlim[1], y[1:i]-ylim[1], color = :white)
-        h3 = plot(xl, zl[i, :], fill = Ibounds[1], fillcolor = :blue, linecolor = :blue, ylim = Ibounds, yticks = nothing, ylabel = "Intensity")
-        h2 = plot([Ibounds[1]; zl[:,i]; Ibounds[1]], [yl[1]; yl; yl[end]], fill = Ibounds[1], fillcolor = :green, linecolor = :green, xlim = Ibounds, xticks = nothing,  yflip = true, xlabel = "Intensity")
+        h3 = plot(xl, zl[i, :], fill = Ibounds[1], fillcolor = :blue, linecolor = :blue, ylim = Ibounds, xlim=extrema(xl), yticks = nothing, ylabel = "Intensity")
+        h2 = plot([Ibounds[1]; zl[:,i]; Ibounds[1]], [yl[1]; yl; yl[end]], fill = Ibounds[1], fillcolor = :green, linecolor = :green, xlim = Ibounds, ylim=extrema(yl), xticks = nothing,  yflip = true, xlabel = "Intensity")
         h4 = heatmap(xl, yl, zl, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true, colorbar = false, color=:inferno)
         plot!(h4, xl[[1, end]], [yl[i], yl[i]], color = :blue)
         plot!(h4, [xl[i], xl[i]], yl[[1, end]], color = :green)
