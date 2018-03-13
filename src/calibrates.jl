@@ -68,11 +68,11 @@ function rotate_sum(img::Matrix{Float64}, θ::Float64)
     # v = collapseim(imgw, 2)
     sort_sum(h)# + sort_sum(v)
 end
-function shift_compare(v::Vector{Float64}, h::Vector{Float64}, step::Int)
-    v1 = circshift(v, step)
-    v1 + h
-end
-shift_sum(v::Vector{Float64}, h::Vector{Float64}, step::Int) = sort_sum(shift_compare(v, h, step))
+# function shift_compare(v::Vector{Float64}, h::Vector{Float64}, step::Int)
+    # v1 = circshift(v, step)
+    # v1 + h
+# end
+# shift_sum(v::Vector{Float64}, h::Vector{Float64}, step::Int) = sort_sum(shift_compare(v, h, step))
 
 function pixel_width(st::Stage)
     file1 = st.timelapse[1].light

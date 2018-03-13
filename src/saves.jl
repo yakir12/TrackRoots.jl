@@ -1,87 +1,115 @@
-using HDF5, ProgressMeter, Plots
+using HDF5, ProgressMeter, Interpolations
 gr()
 default(show=false)
 
-const nscale = 4
-const sz2 = round(Int, sz/nscale)
-const sz3 = round(Int, 2sz2)
+const nscale = 1
+# const sz2 = round(Int, sz/nscale)
+const sz3 = round(Int, sz/2)
 
 function get_parameters(track::Track, Δx::Float64)
     x = last.(track.coordinates)
     y = first.(track.coordinates)
     n = length(track.lengths)
     m = minimum(minimum(i) for i in track.intensities)
-    intensities = zeros(n, n)
+    intensities = fill(m, n, n)
     for i in 1:n, j in 1:i
-        intensities[j,i] = track.intensities[i][j] - m
+        intensities[j,i] = track.intensities[i][j]
     end
     lengths = track.lengths*Δx
     times = track.times
-    return (x, y, n, intensities, lengths, times)
+    return (x, y, n, intensities, lengths, times, m)
 end
 
 function saveit(calibstages::Vector{CalibStage}, tss::Vector{Vector{Track}})
     pm = Progress(sum(length(st.timelapse)*length(ts) for (st, ts) in zip(calibstages, tss)), 1, "Saving the results")
+    path = joinpath(calibstages[1].home, calibstages[1].base)
+    mkpath(path)
     for (st, ts) in zip(calibstages, tss)
-        saveit(st, ts, pm)
+        saveit(st, ts, path, pm)
     end
 end
 
-function saveit(st::CalibStage, rs::Vector{Track}, pm::Progress = Progress(1))
+function saveit(st::CalibStage, rs::Vector{Track}, path::String, pm::Progress)
     isempty(rs) && return nothing
-    imgs = [RGB.(imresize(load(tl.path), (sz2, sz2))) for tl in st.timelapse]
-    mM = mean(quantile(vec(green.(img)), [.1, .995]) for img in imgs)
-    for img in imgs
-        img .= imadjustintensity(img, mM)
-    end
+    imgs = [Float64.(load(tl.path)) for tl in st.timelapse]
+    # imgs = [Float64.(imresize(load(tl.path), (sz2, sz2))) for tl in st.timelapse]
+    # mM = mean(quantile(vec(img), [.1, .995]) for img in imgs)
+    # for img in imgs
+        # img .= imadjustintensity(img, mM)
+    # end
+    path = joinpath(path, "stage $(st.id)")
+    mkpath(path)
     formatlabel(x::T) where T <: Real = round(st.Δx*x*nscale, 1)
+    saveoverview(imgs[end], formatlabel, rs, path)
     for r in rs
-        x, y, n, intensities, lengths, times = get_parameters(r, st.Δx)
-        save2hdf5(st.home, st.base, st.id, r.id, x, y, intensities, lengths, times)
-        save2gif(st.home, st.base, st.id, r.id, x/nscale, y/nscale, n, intensities, lengths, times, formatlabel, imgs, st.Δt, pm)
+        x, y, n, intensities, lengths, times, Imin = get_parameters(r, st.Δx)
+        _path = joinpath(path, "root $(r.id)")
+        mkpath(_path)
+        save2csv(_path, x, y, intensities, lengths, times)
+        save2gif(_path, x/nscale, y/nscale, n, intensities, lengths, times, formatlabel, imgs, st.Δt, Imin, pm)
     end
 end
 
-function save2hdf5(home::String, base::String, stage_number::Int, root_number::Int, x, y, intensities, lengths, times)
-    h5open(joinpath(home, "$(base)_stage_$(stage_number)_root_$(root_number)_summary.h5"), "w") do file
-        gmain = g_create(file, "home")
-        ginfo = g_create(gmain, "information")
-        ginfo["base"] = base
-        ginfo["home"] = home
-        ginfo["stage"] = stage_number
-        ginfo["root"] = root_number
-        attrs(ginfo)["Description"] = "Background information about this root"
-        gt = g_create(gmain, "times")
-        gt["data"] = times
-        attrs(gt)["Description"] = "The times in hours, corresponds to each column in the intensity matrix"
-        gl = g_create(gmain, "lengths")
-        gl["data"] = lengths
-        attrs(gl)["Description"] = "The lengths in millimeters, corresponds to each row in the intensity matrix"
-        gi = g_create(gmain, "intensities")
-        gi["data"] = intensities
-        attrs(gi)["Description"] = "The intensities in relative units. Each row is a single root length, growing from the top to the bottom. Each column is a single point in time, progressing from the top to bottom"
-        gxy = g_create(gmain, "coordinates")
-        gxy["data"] = [x y]
-        attrs(gxy)["Description"] = "The [x y] coordinates in millimeters of the tip of the root as it moves through time."
+function saveoverview(img::Matrix{Float64}, formatlabel::Function, rs::Vector{Track}, path::String)
+    mM = quantile(vec(img), [.1, .995])
+    img .= imadjustintensity(img, mM)
+    heatmap(img, aspect_ratio = 1, yformatter = formatlabel, xformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, legend=false, size=(sz,sz))
+    for r in rs
+        x = last.(r.coordinates)
+        y = first.(r.coordinates)
+        plot!(x, y, color=r.color, linewidth = intensity_radius, annotations=(x[1],y[1],text(string(r.id), :left, r.color)))
     end
+    png(joinpath(path, "roots"))
 end
 
-function save2gif(home::String, base::String, stage_number::Int, root_number::Int, x, y, n::Int, intensities, lengths, times, formatlabel::Function, imgs, Δt::Float64, pm::Progress)
+
+function save2csv(path::String, x, y, intensities, lengths, times)
+    z = [[nothing; lengths] [RowVector(times); intensities]]
+    writecsv(joinpath(path, "intensities.csv"), z)
+    writecsv(joinpath(path, "coordinates.csv"), zip(x, y))
+end
+
+#=function save2gif(path::String, x, y, n::Int, intensities, lengths, times, imgs, Δt::Float64, pm::Progress)
+    _imgs = deepcopy(imgs)
+    p = [(round(Int, xi), round(Int, yi)) for (xi, yi) in zip(x, y)]
+    for i in 1:n
+        draw!(_imgs[i], Path(p[1:i]), RGB{N0f16}(1,0,0))
+        next!(pm)
+    end
+    save(joinpath(path, "root.gif"), cat(3, _imgs...), fps = round(Int, 1/(5/180000*60*60*Δt)))
     Imax = quantile(vec(intensities), 0.98)
     intensities .= min.(intensities, Imax)
+    heatmap(times, lengths, intensities, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true, colorbar = false)
+    png(joinpath(path, "intensities.png"))
+end=#
+
+function save2gif(path::String, x, y, n::Int, intensities, lengths, times, formatlabel::Function, imgs, Δt::Float64, Imin::Float64, pm::Progress)
+    Imax = quantile(vec(intensities), 0.95)
+    intensities .= min.(intensities, Imax)
+    xlim = round.(Int, extrema(x))
+    ylim = round.(Int, extrema(y))
+    imgs2 = [img[ylim[1]:ylim[2], xlim[1]:xlim[2]] for img in imgs]
+    mM = mean(quantile(vec(img), [.1, .995]) for img in imgs2)
+    for img in imgs2
+        img .= imadjustintensity(img, mM)
+    end
+    itp = interpolate((times, lengths), log.(intensities), Gridded(Linear()))
+    xl = linspace(extrema(times)..., n)
+    yl = linspace(extrema(lengths)..., n)
+    zl = itp[xl, yl]
+    Ibounds = extrema(zl)
     anim = Animation()
     for i in 1:n
-        h1 = plot(imgs[i], aspect_ratio = 1, xformatter = formatlabel, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)")
-        plot!(x[1:i], y[1:i], color = :red)
-        h2 = plot([intensities[:,i]; 0], [lengths; lengths[end]], fill = 0, fillcolor = :green, linecolor = :green, xlim = (0, Imax), xticks = nothing,  yflip = true, xlabel = "Intensity")
-        h3 = plot(times, intensities[i, :], fill = 0, fillcolor = :blue, linecolor = :blue, ylim = (0, Imax), yticks = nothing, ylabel = "Intensity")
-        h4 = heatmap(times, lengths, intensities, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true, colorbar = false)
-        plot!(times[[1, end]], [lengths[i], lengths[i]], color = :blue)
-        plot!([times[i], times[i]], lengths[[1, end]], color = :green)
+        h1 = heatmap(imgs2[i], aspect_ratio = 1, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, xticks=[])
+        plot!(x[1:i]-xlim[1], y[1:i]-ylim[1], color = :white)
+        h3 = plot(xl, zl[i, :], fill = Ibounds[1], fillcolor = :blue, linecolor = :blue, ylim = Ibounds, xlim=extrema(xl), yticks = nothing, ylabel = "Intensity")
+        h2 = plot([Ibounds[1]; zl[:,i]; Ibounds[1]], [yl[1]; yl; yl[end]], fill = Ibounds[1], fillcolor = :green, linecolor = :green, xlim = Ibounds, ylim=extrema(yl), xticks = nothing,  yflip = true, xlabel = "Intensity")
+        h4 = heatmap(xl, yl, zl, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true, colorbar = false, color=:inferno)
+        plot!(h4, xl[[1, end]], [yl[i], yl[i]], color = :blue)
+        plot!(h4, [xl[i], xl[i]], yl[[1, end]], color = :green)
         plot(h3, h1, h4, h2, legend = false, size=(sz3, sz3), dpi=50/3)
         Plots.frame(anim)
         next!(pm)
     end
-    filename = "$(base)_stage_$(stage_number)_root_$(root_number)_summary.mp4"
-    mp4(anim, joinpath(home, filename), fps = round(Int, 1/(5/180000*60*60*Δt)))
+    mp4(anim, joinpath(path, "summary.mp4"), fps = round(Int, 1/(5/180000*60*60*Δt)))
 end
