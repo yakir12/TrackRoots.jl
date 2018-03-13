@@ -51,7 +51,7 @@ function saveit(st::CalibStage, rs::Vector{Track}, path::String, pm::Progress)
 end
 
 function saveoverview(img::Matrix{Float64}, formatlabel::Function, rs::Vector{Track}, path::String)
-    mM = quantile(vec(img), [.1, .995])
+    mM = quantile(vec(img), [.1, .95])
     img .= imadjustintensity(img, mM)
     heatmap(img, aspect_ratio = 1, yformatter = formatlabel, xformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, legend=false, size=(sz,sz))
     for r in rs
