@@ -15,3 +15,8 @@ GR
 HDF5
 ProgressMeter
 ImageDraw
+GaussianDistributions
+Interpolations
+OffsetArrays
+CoordinateTransformations
+PaddedViews
