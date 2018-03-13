@@ -4,10 +4,11 @@ using TrackRoots
 import TrackRoots:Mark
 using Base.Test
 
+using DataDeps
+
 # incase there are old test files, remove them just in case they are old/bad
 rm(joinpath(first(DataDeps.default_loadpath), "test"), recursive=true, force=true)
 
-using DataDeps
 ENV["DATADEPS_ALWAY_ACCEPT"]=true
 RegisterDataDep("test",
                 "These are two folders with their `nd` files and multiple dark and light timelapse 16 bit TIF images (1.9 GB total).",
