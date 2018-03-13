@@ -46,8 +46,6 @@ end
     @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "roots.png"))
     @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "coordinates.csv"))
     @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "intensities.csv"))
-    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "intensities.png"))
-    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "root.gif"))
     @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "summary.mp4"))
 
 end
