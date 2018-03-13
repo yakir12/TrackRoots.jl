@@ -50,3 +50,22 @@ end
 
 end
 
+@testset "startpoint" begin
+
+    @test TrackRoots.get_point(GtkReactive.XY{GtkReactive.UserUnit}(.2,.4)) == Mark(.4,.2)
+
+    ndfile = joinpath(datadep"test", "1", "d2.nd")
+    stages = TrackRoots.nd2stages(ndfile)
+    file = stages[1].timelapse[1].dark
+    img, imgtmp, ms = TrackRoots.fetch_image(file)
+    @test img == imgtmp
+    @test ms == [0.0038452735179674985, 0.005874723430228122]
+
+    M = 0.5
+    message = "test"
+    s, b = TrackRoots.build_slider(M, message)
+    @test GtkReactive.value(s) == M
+    @test b isa Gtk.GtkBoxLeaf
+
+end
+

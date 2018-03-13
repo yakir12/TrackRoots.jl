@@ -2,33 +2,45 @@ using Images, ImageView, GtkReactive
 
 get_point(p::XY{UserUnit}) = Mark(p.y.val, p.x.val)
 
-function get_startpoints(f1::String, fn::String)
-    img1 = load(f1)
-    img2 = load(fn)
-    img1tmp = deepcopy(img1)
-    img2tmp = deepcopy(img2)
-    ms1 = quantile(vec(img1), [.1, .999])
-    ms2 = quantile(vec(img2), [.1, .999])
-    m = [ms1[1], ms2[1]]
+function fetch_image(file::String)
+    img = load(file)
+    imgtmp = deepcopy(img)
+    ms = quantile(vec(img), [.1, .999])
+    return (img, imgtmp, ms)
+end
+
+function build_slider(M::Float64, message::String)
+    s = slider(linspace(0,1,2^16), value=1 - M)
+    b = GtkBox(:h)
+    push!(b, label(message), s)
+    setproperty!(b, :expand, widget(s), true)
+    return (s, b)
+end
+
+function get_startpoints(f1::String, f2::String)
+    # build composite image
+    img1, img1tmp, ms1 = fetch_image(f1)
+    img2, img2tmp, ms2 = fetch_image(f2)
     imgc = colorview(RGB, img1tmp, img2tmp, img1tmp)
+    # build sliders
+    M = [ms1[2], ms2[2]]
+    s1, b1 = build_slider(M[1], "First frame (magenta):")
+    s2, b2 = build_slider(M[2], "Last frame (green):")
+    # start the gui
     const g = imshow(imgc, name="Shift-click to add tip, Shift-ctrl-click to remove tip, close window when done")
+    const w = g["gui"]["window"]
     const c = g["gui"]["canvas"]
     const zr = g["roi"]["zoomregion"]
-    s1 = slider(linspace(0,1,2^16), value=1 - ms1[2])
-    s2 = slider(linspace(0,1,2^16), value=1 - ms2[2])
-    b1 = GtkBox(:h)
-    b2 = GtkBox(:h)
-    push!(b1, label("First frame (magenta):"), s1)
-    setproperty!(b1,:expand,widget(s1),true)
-    push!(b2, label("Last frame (green):"), s2)
-    setproperty!(b2,:expand,widget(s2),true)
+    const m = [ms1[1], ms2[1]]
+    # connect the sliders to the gui
     foreach(s1, s2) do M1, M2
         img1tmp .= imadjustintensity(img1, (m[1], 1 - M1))
         img2tmp .= imadjustintensity(img2, (m[2], 1 - M2))
         push!(zr, value(zr).currentview)
     end
     push!(g["gui"]["vbox"], b1, b2)
-    showall(g["gui"]["window"])
+    showall(w)
+    # pointing 
     const add = Signal(XY{UserUnit}(1,1)) 
     const remove = Signal(XY{UserUnit}(1,1)) 
     const roots = foldp(push!, XY{UserUnit}[], add)
@@ -48,7 +60,7 @@ function get_startpoints(f1::String, fn::String)
             end
         end
     end
-    GtkReactive.gc_preserve(g["gui"]["window"], sigstart) 
+    GtkReactive.gc_preserve(w, sigstart) 
     removeidx = map(remove) do xy
         idx = Int[]
         for (i, root) in enumerate(value(roots))
@@ -67,7 +79,7 @@ function get_startpoints(f1::String, fn::String)
         deleteat!(value(points), i)
     end
     close = Condition()
-    Gtk.signal_connect(g["gui"]["window"], :destroy) do widget
+    Gtk.signal_connect(w, :destroy) do widget
         notify(close)
     end
     wait(close)
