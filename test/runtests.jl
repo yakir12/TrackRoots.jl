@@ -19,13 +19,14 @@ end
 
 @testset "all" begin
     startpoints = [[Mark[[774.3011654713115, 911.7642161885246]]], [Mark[[761.334080430328, 413.93003970286884]], Mark[[811.9541095671107, 510.3906089907787]]]]
-    endpoints = [[Mark[[904.9364522125379, 919.0443242002601]]], [Mark[[1017.0597835688507, 208.98726714885305]], Mark[[1017.5227104153928, 315.23929042231043]]]]
+    endpoints = [[Mark[[905.2760077185163, 918.9115390162102]]], [Mark[[1016.9281490727263, 209.57046484226038]], Mark[[1017.350592982095, 315.11227808371984]]]]
     for (i, dataset) in enumerate(["1","5"])
         files = readdir(joinpath(datadep"test", dataset))
         ind = findfirst(x -> last(splitext(x)) == ".nd", files)
         ndfile = joinpath(datadep"test", dataset, files[ind])
         stages = TrackRoots.nd2stages(ndfile)
-        calibstages = TrackRoots.stages2calib(stages)
+        Δx = TrackRoots.pixel_width(stages[1])
+        calibstages = TrackRoots.stages2calib(stages, Δx)
         tracks = TrackRoots.trackroot.(calibstages, startpoints[i])
         endpoint = map(tracks) do t
             map(t) do r
@@ -37,10 +38,17 @@ end
 end
 
 @testset "plotting" begin
+
     startpoint = [Mark[[774.3011654713115, 911.7642161885246]]]
     ndfile = joinpath(datadep"test", "1", "d2.nd")
     main(ndfile, startpoint)
+
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "roots.png"))
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "coordinates.csv"))
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "intensities.csv"))
     @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "intensities.png"))
     @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "root.gif"))
-    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "intensities.csv"))
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "summary.mp4"))
+
 end
+

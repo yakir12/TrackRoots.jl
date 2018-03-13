@@ -1,4 +1,4 @@
-using Kalman
+using Kalman, Plots
 
 import Base:+
 +(p::Mark, i::CartesianIndex{2}) = p + Mark(i.I...)
@@ -16,7 +16,7 @@ const weight_disk = disk(weight_radius)
 const intensity_disk = disk(intensity_radius)
 
 function image_feedback(img::Image, p::Mark)
-    ind = CartesianIndex(round.(Int, p)...)
+    ind = mark2cart(p)
     μ = mean(img[i + ind] for i in weight_disk)
     S = sum(max(0, img[i + ind] - μ) for i in weight_disk)
     sum(max(0, img[i + ind] - μ)*(i + p) for i in weight_disk)/S
@@ -54,7 +54,8 @@ struct Track
     times::Vector{Float64}
     intensities::Vector{Vector{Float64}}
     id::Int
-    function Track(p::Mark, st::CalibStage, id::Int)
+    color::RGB{Float64}
+    function Track(p::Mark, st::CalibStage, id::Int, color::RGB{Float64})
         lengths = Float64[]
         coordinates = Mark[]
         times = Float64[]
@@ -70,7 +71,7 @@ struct Track
         img = load(st.timelapse[1].path)
         I = getintensity(img, p)
         push!(intensities, [I])
-        new(lengths, coordinates, times, intensities, id)
+        new(lengths, coordinates, times, intensities, id, color)
     end
 end
 
@@ -118,7 +119,12 @@ function trackroot(st::CalibStage, startpoints::Vector{Mark})
     isempty(startpoints) && return Track[]
     vrow = speed/st.speed
     roots = [Root(p, vrow) for p in startpoints]
-    tracks = [Track(p, st, i) for (i, p) in enumerate(startpoints)]
+    n = length(startpoints)
+    inds = 1:n
+    m = 5
+    C(g::ColorGradient) = RGB[g[z] for z=linspace(0,1,m)]
+    colors = distinguishable_colors(n+m, C(cgrad(:inferno)))[m+1:end]
+    tracks = [Track(p, st, i, c) for (i, p, c) in zip(inds, startpoints, colors)]
     for (tl1, tl2) in zip(st.timelapse[2:end], [st.timelapse[3:end]; st.timelapse[end]])
         img = load(tl1.path)
         for (r, t) in zip(roots, tracks)

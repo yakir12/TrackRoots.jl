@@ -2,22 +2,33 @@ using Images, ImageView, GtkReactive
 
 get_point(p::XY{UserUnit}) = Mark(p.y.val, p.x.val)
 
-function adjustimgs(files::Vector{String})
-    imgs = [Float64.(load(file)) for file in files]
-    for (i, img) in enumerate(imgs)
-        mM = quantile(vec(img), [.1, .999])
-        img .= imadjustintensity(img, mM)
-    end
-    imgs[2] .-= imgs[1]
-    imgs[2] .= max.(imgs[2], 0)
-    return imgs
-end
-
 function get_startpoints(f1::String, fn::String)
-    imgs = adjustimgs([f1, fn])
-    imgc = colorview(RGB, imgs..., imgs[1])
+    img1 = load(f1)
+    img2 = load(fn)
+    img1tmp = deepcopy(img1)
+    img2tmp = deepcopy(img2)
+    ms1 = quantile(vec(img1), [.1, .999])
+    ms2 = quantile(vec(img2), [.1, .999])
+    m = [ms1[1], ms2[1]]
+    imgc = colorview(RGB, img1tmp, img2tmp, img1tmp)
     const g = imshow(imgc, name="Shift-click to add tip, Shift-ctrl-click to remove tip, close window when done")
     const c = g["gui"]["canvas"]
+    const zr = g["roi"]["zoomregion"]
+    s1 = slider(linspace(0,1,2^16), value=ms1[2])
+    s2 = slider(linspace(0,1,2^16), value=ms2[2])
+    b1 = GtkBox(:h)
+    b2 = GtkBox(:h)
+    push!(b1, label("First frame:"), s1)
+    setproperty!(b1,:expand,widget(s1),true)
+    push!(b2, label("Last frame:"), s2)
+    setproperty!(b2,:expand,widget(s2),true)
+    foreach(s1, s2) do M1, M2
+        img1tmp .= imadjustintensity(img1, (m[1], M1))
+        img2tmp .= imadjustintensity(img2, (m[2], M2))
+        push!(zr, value(zr).currentview)
+    end
+    push!(g["gui"]["vbox"], b1, b2)
+    showall(g["gui"]["window"])
     const add = Signal(XY{UserUnit}(1,1)) 
     const remove = Signal(XY{UserUnit}(1,1)) 
     const roots = foldp(push!, XY{UserUnit}[], add)

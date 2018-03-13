@@ -1,7 +1,8 @@
-using ImageFiltering, ImageFeatures, Distances
+using ImageFiltering, ImageFeatures, OffsetArrays, CoordinateTransformations, PaddedViews #Distances
 
 const h_kernel = Kernel.DoG((5, 180), (5*sqrt(2), 180), (31, 901))
-const α = pi/2 + linspace(-.05, .05, 10)
+const α = pi/2 + linspace(-.02, .02, 10)
+const wavelengths = (250, 600)
 
 exiftool_base = joinpath(Pkg.dir("TrackRoots"), "deps", "src", "exiftool", "exiftool")
 const exiftool = exiftool_base*(is_windows() ? ".exe" : "")
@@ -43,7 +44,7 @@ function parse2hours(x::String)
     tohour(DateTime(parse.(Int, m.captures)...) - DateTime(0))
 end
 
-"""
+#="""
 find_vertical_distances(file)
 Find all the distances between vertical edges in an image. Helps detect the grid lines in the background of the light images.
 """
@@ -55,25 +56,63 @@ function find_vertical_distances(file::String)
     lines = hough_transform_standard(img_edges, 1, α, 40, 10)
     x = first.(lines)'
     return vec(pairwise(Cityblock(), x))
+end=#
+
+
+sort_sum(h::Vector{Float64}) = 1/sum(sort(h, rev=true)[1:4])
+rotateim(img::Matrix{Float64}, θ::Float64) = warp(img, recenter(RotMatrix(θ), Images.center(img)), 0)
+collapseim(img::OffsetArray{Float64,2,Matrix{Float64}}, dim::Int) = vec(parent(sum(img, dim)))
+function rotate_sum(img::Matrix{Float64}, θ::Float64)
+    imgw = rotateim(img, θ)
+    h = collapseim(imgw, 1)
+    # v = collapseim(imgw, 2)
+    sort_sum(h)# + sort_sum(v)
+end
+function shift_compare(v::Vector{Float64}, h::Vector{Float64}, step::Int)
+    v1 = circshift(v, step)
+    v1 + h
+end
+shift_sum(v::Vector{Float64}, h::Vector{Float64}, step::Int) = sort_sum(shift_compare(v, h, step))
+
+function pixel_width(st::Stage)
+    file1 = st.timelapse[1].light
+    file2 = st.timelapse[end].light
+    img1 = load(file1)
+    img2 = load(file2)
+    img = [(Float64(i1) + Float64(i2))/2 for (i1, i2) in zip(img1, img2)]
+    _, i = findmin(rotate_sum(img, x) for x in α)
+    imgw = rotateim(img, α[i])
+    y = collapseim(imgw, 1)
+    n = length(y)
+    z = PaddedView(0, y', (1,n+1*wavelengths[2]))
+    wls = wavelengths[1]:wavelengths[2]
+    phs = 1:wavelengths[2]
+    s = [sum(z[ph + i*wl]/n for i in 0:1) for wl in wls, ph in phs]
+    _, i = findmax(s)
+    iwl, iph = ind2sub(size(s), i)
+    wl = wls[iwl]
+    80/6/wl
 end
 
-"""
-pixel_width(stages)
-Return the first good-enough pixel width from all the images in this stack.
-"""
-function pixel_width(stages::Vector{Stage})
-    for st in stages
-        file = st.timelapse[1].light
-        x = find_vertical_distances(file)
-        filter!(i -> 200 < i < 650, x)
-        isempty(x) || return 80/6/mean(x) # in mm
-    end
-    warn("failed to automatically calibrate the images. Assuming pixels are ~0.04 mm wide, this estimation would correspond to about 350 pixels between two grid lines (please check to make sure this estimation is not too far off)")
-    return 0.03819517804872148
-end
 
-function stages2calib(stages::Vector{Stage})
-    Δx = pixel_width(stages)
+# """
+# pixel_width(stages)
+# Return the first good-enough pixel width from all the images in this stack.
+# """
+# function pixel_width(stages::Vector{Stage})
+    # for st in stages
+        # x = pixel_width(st)
+        # isempty(x) || return 80/6/x # in mm
+        # file = st.timelapse[1].light
+        # x = find_vertical_distances(file)
+        # filter!(i -> 200 < i < 350, x)
+        # isempty(x) || return 80/6/mean(x) # in mm
+    # end
+    # warn("failed to automatically calibrate the images. Assuming pixels are ~0.04 mm wide, this estimation would correspond to about 350 pixels between two grid lines (please check to make sure this estimation is not too far off)")
+    # return 0.03819517804872148
+# end
+
+function stages2calib(stages::Vector{Stage}, Δx::Float64)
     nst = length(stages)
     ntl = length(first(stages).timelapse)
     files = Matrix{String}(ntl, nst)
