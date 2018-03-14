@@ -56,7 +56,9 @@ alt="TrackRoots tutorial video" width="512" height="512" border="10" /></a>
 
 ## Results
 The results from each `.nd` file will be saved in a folder named the same as the `.nd` file. That results folder will contain one folder per stage. Each of those stage folders will contain one `roots.png` image showing which roots got tracked and their corresponding ID number:
+
 ![roots image](./docs/roots.png)
+
 The stage folder will also contain one folder per root. Each of the root folders will contain three files:
 1. `coordinates.csv`: a comma separated file with the `[x, y]` coordinates of the root (in mm).
 2. `intensities.csv`: a comma separated file with the lengths in mm, times in hours, and intensities. The first column is the root lengths (i.e. the distance along the root between the starting location of the tip and its current location), the second column is the intensities at time 0 hours, the third column is the intensities at the next period, etc. 
@@ -65,6 +67,7 @@ The stage folder will also contain one folder per root. Each of the root folders
     2. a heat-map describing the intensity of the root tip as a function of time in hours and root length in mm (i.e. the distance along the root between the starting location of the tip and its current location).
     3. a plot of the intensity as a function of root length in mm.
     4. a plot of the intensity as a function of time in hours.
+
 ![video frame](./docs/video.png)
 
 The resulting file hierarchy will look like this:
