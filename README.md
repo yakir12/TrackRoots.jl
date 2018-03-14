@@ -41,7 +41,7 @@ brew install cairo ffmpeg
 Click to see a tutorial video on how to use the program:
 
 <a href="https://vimeo.com/258615822" target="_blank"><img src="https://raw.githubusercontent.com/yakir12/TrackRoots.jl/master/docs/front.png" 
-alt="TrackRoots tutorial video" width="400" height="400" border="10" /></a>
+alt="TrackRoots tutorial video" width="512" height="512" border="10" /></a>
 
 ## Detailed instructions
 1. The analysis is performed per `.nd` file. These files contain all the information needed to process the dark and bright 16-bit TIF images for all stages. 
@@ -60,13 +60,12 @@ The results from each `.nd` file will be saved in a folder named the same as the
 The stage folder will also contain one folder per root. Each of the root folders will contain three files:
 1. `coordinates.csv`: a comma separated file with the `[x, y]` coordinates of the root (in mm).
 2. `intensities.csv`: a comma separated file with the lengths in mm, times in hours, and intensities. The first column is the root lengths (i.e. the distance along the root between the starting location of the tip and its current location), the second column is the intensities at time 0 hours, the third column is the intensities at the next period, etc. 
-4. `summary.mp4`: a summary video showing
+4. `summary.mp4`: a summary video showing these changes as a function of time:
     1. an image of the progression of the root and its track (`x` and `y` axis are in mm).
     2. a heat-map describing the intensity of the root tip as a function of time in hours and root length in mm (i.e. the distance along the root between the starting location of the tip and its current location).
     3. a plot of the intensity as a function of root length in mm.
     4. a plot of the intensity as a function of time in hours.
 ![video frame](./docs/video.png)
-    as the video plays, these change as a function of time.
 
 The resulting file hierarchy will look like this:
 ```
