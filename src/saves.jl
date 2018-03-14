@@ -87,8 +87,10 @@ end=#
 function save2gif(path::String, x, y, n::Int, intensities, lengths, times, formatlabel::Function, imgs, Δt::Float64, Imin::Float64, pm::Progress)
     Imax = quantile(vec(intensities), 0.95)
     intensities .= min.(intensities, Imax)
-    xlim = round.(Int, extrema(x))
-    ylim = round.(Int, extrema(y))
+    xlim = round.(Int, extrema(x)) .+ [-10, 10]
+    clamp!(xlim, 1, sz) 
+    ylim = round.(Int, extrema(y)) .+ [-10, 10]
+    clamp!(ylim, 1, sz) 
     imgs2 = [adjust_gamma(img[ylim[1]:ylim[2], xlim[1]:xlim[2]], 2.4) for img in imgs]
     mM = mean(quantile(vec(img), [.5, .99]) for img in imgs2)
     for img in imgs2
@@ -112,5 +114,5 @@ function save2gif(path::String, x, y, n::Int, intensities, lengths, times, forma
         Plots.frame(anim)
         next!(pm)
     end
-    mp4(anim, joinpath(path, "summary.mp4"), fps = round(Int, 24/3Δt))
+    mp4(anim, joinpath(path, "summary.mp4"), fps = round(Int, 24/10Δt))
 end

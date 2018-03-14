@@ -22,6 +22,11 @@ This is a `Julia` script for analysing light intensities as a function of time a
    and paste it in the Julia-terminal. Press enter to check if all the tests pass -> this may also take a long time (all tests should pass).
 5. You can close the Julia-terminal after it's done running.
 
+**Note:** If you are on `macOS` you might need to install `cairo` and `ffmpeg`:
+```
+brew install cairo ffmpeg
+```
+
 ## Quick start
 1. Start Julia -> a Julia-terminal popped up.
 2. Copy and paste this in the newly opened Julia-terminal: 

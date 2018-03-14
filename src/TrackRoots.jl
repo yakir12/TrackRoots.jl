@@ -7,7 +7,7 @@ export main, batch_main
 
 using Gtk
 
-head = Gtk.GtkWindow("TrackRoots", 20, 20, false, true, visible=false)
+head = Gtk.GtkWindow("TrackRoots", 20, 20, false, true, visible=false, modal=true)
 
 include(joinpath(Pkg.dir("TrackRoots"), "src", "utils.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "stages.jl"))
