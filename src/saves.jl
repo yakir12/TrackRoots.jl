@@ -20,8 +20,8 @@ function get_parameters(track::Track, Δx::Float64)
     return (x, y, n, intensities, lengths, times, m)
 end
 
-function saveit(calibstages::Vector{CalibStage}, tss::Vector{Vector{Track}})
-    pm = Progress(sum(length(st.timelapse)*length(ts) for (st, ts) in zip(calibstages, tss)), 1, "Saving the results")
+function saveit(calibstages::Vector{CalibStage}, tss::Vector{Vector{Track}}, output::IO)
+    pm = Progress(sum(length(st.timelapse)*length(ts) for (st, ts) in zip(calibstages, tss)), desc = "Saving the results", output = output)
     path = joinpath(calibstages[1].home, calibstages[1].base)
     mkpath(path)
     for (st, ts) in zip(calibstages, tss)
@@ -40,7 +40,7 @@ function saveit(st::CalibStage, rs::Vector{Track}, path::String, pm::Progress)
     path = joinpath(path, "stage $(st.id)")
     mkpath(path)
     formatlabel(x::T) where T <: Real = round(st.Δx*x*nscale, 1)
-    saveoverview(imgs[end], formatlabel, rs, path)
+    saveoverview(deepcopy(imgs[end]), formatlabel, rs, path)
     for r in rs
         x, y, n, intensities, lengths, times, Imin = get_parameters(r, st.Δx)
         _path = joinpath(path, "root $(r.id)")
@@ -51,7 +51,8 @@ function saveit(st::CalibStage, rs::Vector{Track}, path::String, pm::Progress)
 end
 
 function saveoverview(img::Matrix{Float64}, formatlabel::Function, rs::Vector{Track}, path::String)
-    mM = quantile(vec(img), [.1, .95])
+    img .= adjust_gamma(img, 2.4)
+    mM = quantile(vec(img), [.5, .995])
     img .= imadjustintensity(img, mM)
     heatmap(img, aspect_ratio = 1, yformatter = formatlabel, xformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, legend=false, size=(sz,sz))
     for r in rs
@@ -88,8 +89,8 @@ function save2gif(path::String, x, y, n::Int, intensities, lengths, times, forma
     intensities .= min.(intensities, Imax)
     xlim = round.(Int, extrema(x))
     ylim = round.(Int, extrema(y))
-    imgs2 = [img[ylim[1]:ylim[2], xlim[1]:xlim[2]] for img in imgs]
-    mM = mean(quantile(vec(img), [.1, .995]) for img in imgs2)
+    imgs2 = [adjust_gamma(img[ylim[1]:ylim[2], xlim[1]:xlim[2]], 2.4) for img in imgs]
+    mM = mean(quantile(vec(img), [.5, .99]) for img in imgs2)
     for img in imgs2
         img .= imadjustintensity(img, mM)
     end
@@ -101,7 +102,7 @@ function save2gif(path::String, x, y, n::Int, intensities, lengths, times, forma
     anim = Animation()
     for i in 1:n
         h1 = heatmap(imgs2[i], aspect_ratio = 1, yformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, xticks=[])
-        plot!(x[1:i]-xlim[1], y[1:i]-ylim[1], color = :white)
+        # plot!(x[1:i]-xlim[1], y[1:i]-ylim[1], color = :white)
         h3 = plot(xl, zl[i, :], fill = Ibounds[1], fillcolor = :blue, linecolor = :blue, ylim = Ibounds, xlim=extrema(xl), yticks = nothing, ylabel = "Intensity")
         h2 = plot([Ibounds[1]; zl[:,i]; Ibounds[1]], [yl[1]; yl; yl[end]], fill = Ibounds[1], fillcolor = :green, linecolor = :green, xlim = Ibounds, ylim=extrema(yl), xticks = nothing,  yflip = true, xlabel = "Intensity")
         h4 = heatmap(xl, yl, zl, xlabel = "Time (hrs)", ylabel = "Root length (mm)", yflip = true, colorbar = false, color=:inferno)
@@ -111,5 +112,5 @@ function save2gif(path::String, x, y, n::Int, intensities, lengths, times, forma
         Plots.frame(anim)
         next!(pm)
     end
-    mp4(anim, joinpath(path, "summary.mp4"), fps = round(Int, 1/(5/180000*60*60*Δt)))
+    mp4(anim, joinpath(path, "summary.mp4"), fps = round(Int, 24/3Δt))
 end
