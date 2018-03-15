@@ -45,7 +45,7 @@ alt="TrackRoots tutorial video" width="512" height="512" border="10" /></a>
 
 ## Detailed instructions
 1. The analysis is performed per `.nd` file. These files contain all the information needed to process the dark and bright 16-bit TIF images for all stages. 
-2. After choosing the `.nd` file, you'll be presented with a composite image of the first stage. In order to help with identifying the correct root tip, this image shows you a composite of the first (magenta colored) and last (green colored) frames of the time-lapse. You can use the sliders at the bottom of the window to adjust the exposure of the first and last frames. To select a root tip `Shift-click` on the tip of a root you want to include in your analysis. A red dot will appear where you've clicked. To unselect press `Shift-Crtl-click` in the vicinity of the spot/s you want to remove. The closest spots will disappear.
+2. After choosing the `.nd` file, you'll be presented with a composite image of the first stage. In order to help with identifying the correct root tip, this image shows you a composite of the first (magenta colored) and last (green colored) frames of the time-lapse. You can use the sliders at the bottom of the window to adjust the exposure of the first and last frames. To select a root tip `Shift-click` on the tip of a (magenta colored) root you want to include in your analysis. A blue dot will appear where you've clicked. To unselect press `Shift-Crtl-click` in the vicinity of the spot/s you want to remove. The closest spots will disappear.
 
    To facilitate identification use the zoom: `Ctrl-click` and drag somewhere inside the image. You'll see the typical rubberband selection, and once you let go the image display will zoom in on the selected region. If you click on the image without holding down `Ctrl`, you can drag the image to look at nearby regions. `Ctrl-double-click` on the image to restore the full region. If you have a wheel mouse, zoom in again and scroll the wheel, which should cause the image to pan vertically. If you scroll while holding down `Shift`, it pans horizontally; hold down `Ctrl` and you affect the zoom setting.
 
@@ -72,14 +72,14 @@ The stage folder will also contain one folder per root. Each of the root folders
 
 The resulting file hierarchy will look like this:
 ```
-top_folder
-│   series1.nd
-│   series1_w1[None]_s1_t1.TIF
-│   series1_w1[None]_s1_t2.TIF
-│   series1_w1[None]_s1_t3.TIF
+folder
+│   dataset_1.nd
+│   dataset_1_w1[None]_s1_t1.TIF
+│   dataset_1_w1[None]_s1_t2.TIF
+│   dataset_1_w1[None]_s1_t3.TIF
 │   …
 │
-└───series1
+└───dataset_1
     │   
     ├───satge_1
     │   │   roots.png

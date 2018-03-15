@@ -45,7 +45,7 @@ function get_startpoints(f1::String, f2::String)
     const remove = Signal(XY{UserUnit}(1,1)) 
     const roots = foldp(push!, XY{UserUnit}[], add)
     const points = foldp([], add) do a, xy
-        push!(a, ImageView.annotate!(g, AnnotationPoint(xy.x.val, xy.y.val, shape='.', size=10, color=RGB(1,0,0))))
+        push!(a, ImageView.annotate!(g, AnnotationPoint(xy.x.val, xy.y.val, shape='.', size=10, color=RGB(0,0,1))))
     end
     sigstart = map(c.mouse.buttonpress) do btn
         if btn.button == 1 # mouse click

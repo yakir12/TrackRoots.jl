@@ -58,7 +58,7 @@ function saveoverview(img::Matrix{Float64}, formatlabel::Function, rs::Vector{Tr
     for r in rs
         x = last.(r.coordinates)
         y = first.(r.coordinates)
-        plot!(x, y, color=r.color, linewidth = intensity_radius, annotations=(x[1],y[1],text(string(r.id), :left, r.color)))
+        plot!(x, y, color=r.color, linestyle = :dot, linewidth = 5, linewidth = intensity_radius, annotations=(x[1],y[1],text(string(r.id), :left, r.color, 25)))
     end
     png(joinpath(path, "roots"))
 end
