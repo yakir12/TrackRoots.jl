@@ -41,7 +41,7 @@ brew install cairo ffmpeg
 Click to see a tutorial video on how to use the program:
 
 <a href="https://vimeo.com/258615822" target="_blank"><img src="https://raw.githubusercontent.com/yakir12/TrackRoots.jl/master/docs/front.png" 
-alt="TrackRoots tutorial video" width="512" height="512" border="10" /></a>
+alt="TrackRoots tutorial video" width="512" height="288" border="10" /></a>
 
 ## Detailed instructions
 1. The analysis is performed per `.nd` file. These files contain all the information needed to process the dark and bright 16-bit TIF images for all stages. 
