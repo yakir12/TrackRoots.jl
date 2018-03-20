@@ -60,7 +60,7 @@ The results from each `.nd` file will be saved in a folder named the same as the
 ![roots image](./docs/roots.png)
 
 The stage folder will also contain one folder per root. Each of the root folders will contain three files:
-1. `coordinates.csv`: a comma separated file with the `[x, y]` coordinates of the root (in mm).
+1. `coordinates.csv`: a comma separated file with the `[x, y]` coordinates of the tips of the root (in mm) as a function of time (as it grew).
 2. `intensities.csv`: a comma separated file with the lengths in mm, times in hours, and intensities. The first column is the root lengths (i.e. the distance along the root between the starting location of the tip and its current location), the second column is the intensities at time 0 hours, the third column is the intensities at the next period, etc. 
 4. `summary.mp4`: a summary video showing these changes as a function of time:
     1. an image of the progression of the root and its track (`x` and `y` axis are in mm).

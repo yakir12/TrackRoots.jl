@@ -6,8 +6,8 @@ using Base.Test
 
 using DataDeps
 
-# incase there are old test files, remove them just in case they are old/bad
-rm(joinpath(first(DataDeps.default_loadpath), "test"), recursive=true, force=true)
+# # incase there are old test files, remove them just in case they are old/bad
+# rm(joinpath(first(DataDeps.default_loadpath), "test"), recursive=true, force=true)
 
 ENV["DATADEPS_ALWAY_ACCEPT"]=true
 RegisterDataDep("test",
