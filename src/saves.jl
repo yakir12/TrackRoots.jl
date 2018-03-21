@@ -114,5 +114,7 @@ function save2gif(path::String, x, y, n::Int, intensities, lengths, times, forma
         Plots.frame(anim)
         next!(pm)
     end
-    mp4(anim, joinpath(path, "summary.mp4"), fps = round(Int, 24/10Δt), show_msg=false)
+    mp4(anim, joinpath(path, "summary.mp4"), fps = round(Int, 24/10Δt))
+    # for when the latest Plots get tagged:
+    # mp4(anim, joinpath(path, "summary.mp4"), fps = round(Int, 24/10Δt), show_msg=false)
 end
