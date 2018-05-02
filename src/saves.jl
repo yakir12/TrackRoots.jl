@@ -29,6 +29,7 @@ function saveit(calibstages::Vector{CalibStage}, tss::Vector{Vector{Track}}, out
 end
 
 function filterdone!(rs::Vector{Track}, path::String)
+    # isdir(path) || return rs
     fs = readdir(path)
     ffs = joinpath.(path, fs)
     summary = any(zip(ffs, fs)) do fff
@@ -46,6 +47,7 @@ end
 
 function saveit(st::CalibStage, rs::Vector{Track}, path::String, pm::Progress)
     path = joinpath(path, "stage $(st.id)")
+    mkpath(path)
     info("Stage $(st.id)")
     filterdone!(rs, path)
     isempty(rs) && return nothing

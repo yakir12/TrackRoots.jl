@@ -39,10 +39,8 @@ end
 @testset "utils" begin
     a = TrackRoots.disk(1)
     @test all(CartesianIndex(i) ∈ a for i in [(-1,0), (0,-1), (0,0), (0,1), (1,0)])
-
     @test TrackRoots.isnd("name.nd")
     @test !TrackRoots.isnd("name.ndd")
-
     ndfiles = TrackRoots.findall_nd(joinpath(first(DataDeps.default_loadpath), "test"))
     @test length(ndfiles) == 2
 end
