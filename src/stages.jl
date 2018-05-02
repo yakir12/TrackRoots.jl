@@ -87,5 +87,7 @@ nd2stages(file::String) = open(file, "r") do o
     for (i, tl) in enumerate(timelapses)
         push!(stages, Stage(tl, i, home, base))
     end
+    path = joinpath(home, base)
+    mkpath(path)
     return stages
 end

@@ -15,6 +15,7 @@ include(joinpath(Pkg.dir("TrackRoots"), "src", "startPoints.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "calibrates.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "saves.jl"))
+include(joinpath(Pkg.dir("TrackRoots"), "src", "nodes.jl"))
 
 function main(stages::Vector{Stage}, startpoints::Vector{Vector{Mark}}, Δx::Float64, output::IO)
     calibstages = stages2calib(stages, Δx)

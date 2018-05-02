@@ -1,6 +1,6 @@
 using Images, ImageView, GtkReactive
 
-get_point(p::XY{UserUnit}) = Mark(p.y.val, p.x.val)
+get_point(p::XY{UserUnit}) = Mark(round(p.y.val, 2), round(p.x.val, 2))
 
 function fetch_image(file::String)
     img = load(file)
@@ -86,4 +86,27 @@ function get_startpoints(f1::String, f2::String)
     return get_point.(value(roots))
 end
 
-get_startpoints(stage::Stage) = get_startpoints(stage.timelapse[1].dark, stage.timelapse[end].dark)
+function get_startpoints(stage::Stage) 
+    path = joinpath(stage.home, stage.base, "stage $(stage.id)")
+    mkpath(path)
+    file = joinpath(path, "start_points.csv")
+    if isfile(file) 
+        info("Starting points already exist for stage #$(stage.id). Using those (delete $file if you want to choose new starting points)…")
+        a = readcsv(file, Float64)
+        n = size(a, 1)
+        return [Mark(a[i,1], a[i,2]) for i in 1:n]
+    else
+        for f in readdir(path)
+            ff = joinpath(path, f)
+            if isdir(ff)
+                r"^root \d*$"(f) && rm(ff, recursive=true)
+            else
+                "roots.png" == f && rm(ff)
+            end
+        end
+        startpoints = get_startpoints(stage.timelapse[1].dark, stage.timelapse[end].dark)
+        isempty(startpoints) || writecsv(file, startpoints)
+        return startpoints
+    end
+end
+
