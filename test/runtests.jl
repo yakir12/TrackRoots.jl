@@ -45,21 +45,6 @@ end
     @test length(ndfiles) == 2
 end
 
-@testset "plotting" begin
-
-    startpoint = [Mark[[774.3011654713115, 911.7642161885246]]]
-    ndfile = joinpath(datadep"test", "1", "d2.nd")
-    main(ndfile, startpoint, Base.DevNullStream())
-
-    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "roots.png"))
-    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "coordinates.csv"))
-    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "intensities.csv"))
-    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "summary.mp4"))
-
-    #clean up
-    rm(joinpath(first(DataDeps.default_loadpath), "test", "1", "d2"), recursive=true, force=true)
-end
-
 @testset "startpoint" begin
 
     @test TrackRoots.get_point(GtkReactive.XY{GtkReactive.UserUnit}(.2,.4)) == Mark(.4,.2)
@@ -77,5 +62,20 @@ end
     @test GtkReactive.value(s) == M
     @test b isa Gtk.GtkBoxLeaf
 
+end
+
+@testset "plotting" begin
+
+    startpoint = [Mark[[774.3011654713115, 911.7642161885246]]]
+    ndfile = joinpath(datadep"test", "1", "d2.nd")
+    main(ndfile, startpoint, Base.DevNullStream())
+
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "roots.png"))
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "coordinates.csv"))
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "intensities.csv"))
+    @test isfile(joinpath(datadep"test", "1", "d2", "stage 1", "root 1", "summary.mp4"))
+
+    #clean up
+    rm(joinpath(first(DataDeps.default_loadpath), "test", "1", "d2"), recursive=true, force=true)
 end
 
