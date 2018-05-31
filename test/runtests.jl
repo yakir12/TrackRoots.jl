@@ -10,11 +10,11 @@ using DataDeps
 # rm(joinpath(first(DataDeps.default_loadpath), "test"), recursive=true, force=true)
 
 ENV["DATADEPS_ALWAY_ACCEPT"]=true
-RegisterDataDep("test",
+register(DataDep("test",
                 "These are two folders with their `nd` files and multiple dark and light timelapse 16 bit TIF images (1.9 GB total).",
                 "https://s3.eu-central-1.amazonaws.com/yakirgagnon/roots/test.zip",
                 "d99b8f2edce5e72104ba1cfed02798a6683bc22f4b76a5cb823c80257bc4bf48",
-                post_fetch_method=unpack)
+                post_fetch_method=unpack))
 
 @testset "all" begin
     startpoints = [[Mark[[774.3011654713115, 911.7642161885246]]], [Mark[[761.334080430328, 413.93003970286884]], Mark[[811.9541095671107, 510.3906089907787]]]]
