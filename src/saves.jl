@@ -74,7 +74,7 @@ function saveoverview(img::Matrix{Float64}, formatlabel::Function, rs::Vector{Tr
     img .= adjust_gamma(img, 2.4)
     mM = quantile(vec(img), [.5, .995])
     img .= imadjustintensity(img, mM)
-    heatmap(flipdim(img, 1), aspect_ratio = 1, yformatter = formatlabel, xformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, legend=false, , dpi=50/3) # size=(sz,sz) =====>> segmentation
+    heatmap(flipdim(img, 1), aspect_ratio = 1, yformatter = formatlabel, xformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, legend=false, dpi=50/3) # size=(sz,sz) =====>> segmentation
   # heatmap(flipdim(img, 1), aspect_ratio = 1, yformatter = formatlabel, xformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, legend=false, size=(sz,sz), dpi=50/3)
     for r in rs
         x = last.(r.coordinates)
