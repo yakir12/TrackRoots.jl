@@ -80,7 +80,7 @@ function saveoverview(img::Matrix{Float64}, formatlabel::Function, rs::Vector{Tr
         y = first.(r.coordinates)
         # plot!(x, y, color=r.color, linestyle = :dot, linewidth = 5, linewidth = intensity_radius, annotations=(x[1],y[1],text(string(r.id), :left, r.color, 25))) # works
     end
-    # png(joinpath(path, "roots"))
+    png(joinpath(path, "roots"))
 end
 
 
