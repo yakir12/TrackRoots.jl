@@ -1,4 +1,6 @@
 using ImageFiltering, ImageFeatures, OffsetArrays, CoordinateTransformations, PaddedViews, Distances, StaticArrays, Kalman, Plots, Gtk, Images, ImageView, GtkReactive, HDF5, ProgressMeter, Interpolations
+gr()
+default(show=false)
 const Mark = SVector{2, Float64}
 const sz = 100
 const intensity_radius = 2
