@@ -1,5 +1,6 @@
 using HDF5, ProgressMeter, Interpolations
-pyplot()
+# pyplot()
+gr()
 default(show=false)
 
 const nscale = 1
