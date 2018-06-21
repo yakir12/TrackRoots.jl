@@ -6,16 +6,15 @@ using Base.Test
 
 using DataDeps
 
-# # incase there are old test files, remove them just in case they are old/bad
-# rm(joinpath(first(DataDeps.default_loadpath), "test"), recursive=true, force=true)
-rm(joinpath(DataDeps.determine_save_path("test"), "1", "d2"), recursive=true, force=true)
-
 ENV["DATADEPS_ALWAY_ACCEPT"]=true
 register(DataDep("test",
                 "These are two folders with their `nd` files and multiple dark and light timelapse 16 bit TIF images (1.9 GB total).",
                 "https://s3.eu-central-1.amazonaws.com/yakirgagnon/roots/test.zip",
                 "d99b8f2edce5e72104ba1cfed02798a6683bc22f4b76a5cb823c80257bc4bf48",
                 post_fetch_method=unpack))
+
+# # incase there are old test files, remove them just in case they are old/bad
+rm(joinpath(datadep"test", "1", "d2"), recursive=true, force=true)
 
 @testset "all" begin
     startpoints = [[Mark[[774.3011654713115, 911.7642161885246]]], [Mark[[761.334080430328, 413.93003970286884]], Mark[[811.9541095671107, 510.3906089907787]]]]
@@ -42,7 +41,7 @@ end
     @test all(CartesianIndex(i) ∈ a for i in [(-1,0), (0,-1), (0,0), (0,1), (1,0)])
     @test TrackRoots.isnd("name.nd")
     @test !TrackRoots.isnd("name.ndd")
-    ndfiles = TrackRoots.findall_nd(joinpath(first(DataDeps.default_loadpath), "test"))
+    ndfiles = TrackRoots.findall_nd(datadep"test")
     @test length(ndfiles) == 2
 end
 
