@@ -8,7 +8,7 @@ using DataDeps
 
 # # incase there are old test files, remove them just in case they are old/bad
 # rm(joinpath(first(DataDeps.default_loadpath), "test"), recursive=true, force=true)
-rm(joinpath(first(DataDeps.default_loadpath), "test", "1", "d2"), recursive=true, force=true)
+rm(joinpath(DataDeps.determine_save_path("test"), "1", "d2"), recursive=true, force=true)
 
 ENV["DATADEPS_ALWAY_ACCEPT"]=true
 register(DataDep("test",
