@@ -75,20 +75,11 @@ function saveoverview(img::Matrix{Float64}, formatlabel::Function, rs::Vector{Tr
     img .= adjust_gamma(img, 2.4)
     mM = quantile(vec(img), [.5, .995])
     img .= imadjustintensity(img, mM)
-<<<<<<< HEAD
     heatmap(flipdim(img, 1), aspect_ratio = 1, yformatter = formatlabel, xformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, legend=false)#, size=(sz,sz), dpi=50/3)
     for r in rs
         x = last.(r.coordinates)
         y = first.(r.coordinates)
         plot!(x, y, color=r.color, linestyle = :dot, linewidth = 5, linewidth = intensity_radius, annotations=(x[1],y[1],text(string(r.id), :left, r.color, 25)))
-=======
-    # heatmap(flipdim(img, 1), aspect_ratio = 1, yformatter = formatlabel, xformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, legend=false) # dpi=50/3 and/or size=(sz,sz) =====>> segmentation
-  heatmap(flipdim(img, 1), aspect_ratio = 1, yformatter = formatlabel, xformatter = formatlabel, xlabel = "X (mm)", ylabel = "Y (mm)", color=:inferno, yflip=true, colorbar=false, legend=false, size=(sz,sz), dpi=50/3)
-    for r in rs
-        x = last.(r.coordinates)
-        y = first.(r.coordinates)
-        plot!(x, y, color=r.color, linestyle = :dot, linewidth = 5, linewidth = intensity_radius, annotations=(x[1],y[1],text(string(r.id), :left, r.color, 25))) # works
->>>>>>> debug
     end
     png(joinpath(path, "roots"))
 end
