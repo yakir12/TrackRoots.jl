@@ -1,0 +1,24 @@
+julia 0.6
+
+Cairo 0.4.0 0.4.1
+ImageMagick
+ImageFiltering
+ImageFeatures
+Distances
+StaticArrays
+Gtk
+Images
+ImageView
+GtkReactive
+Plots
+GR
+HDF5
+ProgressMeter
+ImageDraw
+GaussianDistributions
+Interpolations
+OffsetArrays
+CoordinateTransformations
+PaddedViews
+
+@osx QuartzImageIO
