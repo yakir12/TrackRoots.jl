@@ -65,9 +65,9 @@ function get_parameters(row::Vector{Float64})
     m == M && return (0.0, 0.0, 0)
     Δ = M - m
     p = (row[end] - m)/Δ
-    return (Δ, p, findfirst(row .> m + Δ/2))
+    return (M, p, findfirst(row .> m + Δ/2))
 end
-const w = 10
+const w = 15
 function detect_nodes(track::Track)
     # track = tracks[2][1]
     n = length(track.intensities)
@@ -78,12 +78,13 @@ function detect_nodes(track::Track)
     end
     y = vec(mean(intensities, 2))
     j = find_peaks(y)
-    map(j) do i
+    nodes = map(j) do i
         Δ, p, ti = get_parameters(intensities[i, :])
         # Node(i[1], ti, x -> text("($Δ, $p)", 5, RGB(1,1,1)))
         # Node(i[1], ti, x -> text("$Δ-$p", RGBA(0,1,0, Int(x > ti)), 8))
         Node(i[1], ti, Δ, p)
     end
+    filter!(node -> node.Δ > 0.2, nodes)
     #=rows = [track.intensities[i][1:end-w] for i in w + 1:n]
     y = [mean(rows[i][min(j, i)] for i in 1:n-w) for j in 1:n-w]
 

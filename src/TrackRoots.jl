@@ -5,17 +5,35 @@ module TrackRoots
 
 export main, batch_main
 
-using Gtk
+using NDFiles, CSV, Images
 
-head = Gtk.GtkWindow("TrackRoots", 20, 20, false, true, visible=false, modal=true)
+const roottips = joinpath(Pkg.dir("RootTips"), "src", "roottips.jl")
+const julia_ndfile = joinpath(tempdir(), "JULIA_NDFILE")
 
 include(joinpath(Pkg.dir("TrackRoots"), "src", "utils.jl"))
-include(joinpath(Pkg.dir("TrackRoots"), "src", "stages.jl"))
-include(joinpath(Pkg.dir("TrackRoots"), "src", "startPoints.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "calibrates.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "tracks.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "saves.jl"))
 include(joinpath(Pkg.dir("TrackRoots"), "src", "nodes.jl"))
+
+function get_startpoints(stage)
+    path = joinpath(stage.home, stage.base, "stage $(stage.id)")
+    file = joinpath(path, "start_points.csv")
+    if isfile(file) 
+        a = readcsv(file, Float64)
+        n = size(a, 1)
+        [Mark(a[i,1], a[i,2]) for i in 1:n]
+    else
+        Mark[]
+    end
+end
+
+function main(ndfile::String)
+    stages = nd2stages(ndfile)
+    startpoints = get_startpoints.(stages)
+    Δx = pixel_width(first(stages))
+    main(stages, startpoints, Δx, STDERR)
+end
 
 function main(stages::Vector{Stage}, startpoints::Vector{Vector{Mark}}, Δx::Float64, output::IO)
     calibstages = stages2calib(stages, Δx)
@@ -26,12 +44,12 @@ function main(stages::Vector{Stage}, startpoints::Vector{Vector{Mark}}, Δx::Flo
     output == STDERR && info("Done!")
 end
 
-function main(; ndfile::String = open_dialog("Pick an `.nd` file", head, ("*.nd",)), stages::Vector{Stage} = nd2stages(ndfile), Δx::T = pixel_width(first(stages))) where T<:Real
-    # function main(; ndfile::String = open_dialog("Pick an `.nd` file", GtkNullContainer(), ("*.nd",)), stages::Vector{Stage} = nd2stages(ndfile), Δx::T = pixel_width(stages)) where T<:Real
+#=function main(; ndfile::String = open_dialog("Pick an `.nd` file", head, ("*.nd",)), stages::Vector{Stage} = nd2stages(ndfile), Δx::T = pixel_width(first(stages))) where T<:Real
+# function main(; ndfile::String = open_dialog("Pick an `.nd` file", GtkNullContainer(), ("*.nd",)), stages::Vector{Stage} = nd2stages(ndfile), Δx::T = pixel_width(stages)) where T<:Real
     startpoints = get_startpoints.(stages)
     info("Aquired the `.nd` file and the starting points of the root-tips. Calibrating the data…")
     main(stages, startpoints, Float64(Δx), STDERR)
-end
+end=#
 
 # main(ndfile::String, startpoints::Vector{Vector{Mark}}, output::IO) = main(nd2stages(ndfile), startpoints, output)
 # batch
@@ -53,7 +71,7 @@ function findall_nd(home::String)
     return ndfiles
 end
 
-function batch_main(home::String = open_dialog("Pick a folder where all the `.nd` files are", action=GtkFileChooserAction.SELECT_FOLDER))
+function batch_main(home::String)
     ndfiles = findall_nd(home)
     n = length(ndfiles)
     info("Found $n `.nd` files")
