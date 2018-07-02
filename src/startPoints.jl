@@ -27,11 +27,11 @@ function get_startpoints(f1::String, f2::String)
     s1, b1 = build_slider(M[1], "First frame (magenta):")
     s2, b2 = build_slider(M[2], "Last frame (green):")
     # start the gui
-    const g = imshow(imgc, name="Shift-click to add tip, Shift-ctrl-click to remove tip, close window when done")
-    const w = g["gui"]["window"]
-    const c = g["gui"]["canvas"]
-    const zr = g["roi"]["zoomregion"]
-    const m = [ms1[1], ms2[1]]
+    g = imshow(imgc, name="Shift-click to add tip, Shift-ctrl-click to remove tip, close window when done")
+    w = g["gui"]["window"]
+    c = g["gui"]["canvas"]
+    zr = g["roi"]["zoomregion"]
+    m = [ms1[1], ms2[1]]
     # connect the sliders to the gui
     foreach(s1, s2) do M1, M2
         img1tmp .= imadjustintensity(img1, (m[1], 1 - M1))
@@ -41,10 +41,10 @@ function get_startpoints(f1::String, f2::String)
     push!(g["gui"]["vbox"], b1, b2)
     showall(w)
     # pointing 
-    const add = Signal(XY{UserUnit}(1,1)) 
-    const remove = Signal(XY{UserUnit}(1,1)) 
-    const roots = foldp(push!, XY{UserUnit}[], add)
-    const points = foldp([], add) do a, xy
+    add = Signal(XY{UserUnit}(1,1)) 
+    remove = Signal(XY{UserUnit}(1,1)) 
+    roots = foldp(push!, XY{UserUnit}[], add)
+    points = foldp([], add) do a, xy
         push!(a, ImageView.annotate!(g, AnnotationPoint(xy.x.val, xy.y.val, shape='.', size=10, color=RGB(0,0,1))))
     end
     sigstart = map(c.mouse.buttonpress) do btn

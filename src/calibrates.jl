@@ -32,7 +32,7 @@ struct CalibStage
     CalibStage(timelapse::Vector{DarkFile}, Δt::Float64, Δx::Float64, id::Int, home::String, base::String) = new(timelapse, Δt, Δx, Δx/Δt, id, home, base)
 end
 
-tohour{T}(t::T) = t/convert(T, Dates.Hour(1))
+tohour(t::T) where {T} = t/convert(T, Dates.Hour(1))
 
 """
 parse2hours(txt)
